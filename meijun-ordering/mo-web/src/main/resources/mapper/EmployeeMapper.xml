@@ -32,7 +32,7 @@
         update employees
         <set>
             <if test="employee.username != null and employee.username != ''">
-                username = #{employee.username}
+                username = #{employee.username},
             </if>
             <if test="employee.password != null and employee.password != ''">
                 `password` = #{employee.password},

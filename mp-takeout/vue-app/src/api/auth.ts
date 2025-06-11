@@ -1,8 +1,9 @@
 import request from '../utils/request';
 import type { AuthLoginDTO, AuthLoginVo, KaptchaVO } from './types';
+import type {ApiResponse} from "./api-response.ts";
 
 export const login = (data: AuthLoginDTO) =>
-  request.post<AuthLoginVo>('/auth/login', data);
+  request.post<ApiResponse<AuthLoginVo>>('/auth/login', data);
 
 export const getCaptchaBase64 = () =>
-  request.get<KaptchaVO>('/auth/base64-captcha');
+  request.get<ApiResponse<KaptchaVO>>('/auth/base64-captcha');

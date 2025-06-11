@@ -22,10 +22,6 @@
             <if test="name != null and name != ''">
                 username like concat('%',#{name},'%')
             </if>
-        or
-            <if test="id != null">
-                id = #{id}
-            </if>
     </select>
 
     <update id="updateCustomer" parameterType="com.mo.entity.Customer">

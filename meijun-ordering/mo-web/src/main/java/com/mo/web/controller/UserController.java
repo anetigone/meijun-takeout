@@ -37,10 +37,10 @@ public class UserController {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("/info")
     @Operation(summary = "获取用户信息")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = User.class)))
-    public Result<User> info() throws ClassNotFoundException {
+    @GetMapping("/info")
+    public Result<User> info() {
         String uuid = BaseContext.getCurrentId();
         if(uuid == null) {
             throw new UserNotLoginException(MessageConstant.USER_NOT_LOGIN);
@@ -49,7 +49,12 @@ public class UserController {
         String identity = (String) redisService.hGet(RedisKeyConstant.USER_IDENTITY, uuid);
         UserIdentity ui = UserIdentity.fromString(identity);
 
-        Class<?> clazz = Class.forName("com.mo.entity." + ui.getName());
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName("com.mo.entity." + ui.getName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         User user = (User) redisService.getEntity(uuid, clazz);
 
         return Result.success(user);
@@ -60,7 +65,7 @@ public class UserController {
             @Parameter(name = "UserInfoDTO", description = "用户信息", required = true, schema = @Schema(implementation = UserInfoDTO.class))
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
-    @GetMapping("/update")
+    @PutMapping("/update")
     public Result<String> update(@RequestBody UserInfoDTO userInfoDTO) {
         User user = new User();
         BeanUtils.copyProperties(userInfoDTO, user);

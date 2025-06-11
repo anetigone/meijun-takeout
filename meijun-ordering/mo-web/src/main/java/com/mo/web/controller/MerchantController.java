@@ -194,12 +194,11 @@ public class MerchantController {
     @Operation(summary = "搜索用户")
     @Parameters ({
             @Parameter(name = "name", description = "用户名", required = true),
-            @Parameter(name = "id", description = "用户ID", required = true)
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Customer.class)))
     @GetMapping("/users/search")
-    public Result<List<Customer>> searchForCustomer(@RequestParam String name,  @RequestParam Long id){
-        List<Customer> list = customerService.searchForCustomer(name, id);
+    public Result<List<Customer>> searchForCustomer(@RequestParam String name){
+        List<Customer> list = customerService.searchForCustomer(name);
 
         return Result.success(list);
     }

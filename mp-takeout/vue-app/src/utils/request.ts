@@ -11,12 +11,15 @@ service.interceptors.request.use(config => {
   let token = '';
   if (path.startsWith('/adm')) {
     token = localStorage.getItem('token') || '';
+    config.headers['userType'] = 0;
     if (token) config.headers['adminToken'] = `Bearer ${token}`;
   } else if (path.startsWith('/mer')) {
     token = localStorage.getItem('token') || '';
+    config.headers['userType'] = 1;
     if (token) config.headers['merchantToken'] = `Bearer ${token}`;
   } else if (path.startsWith('/emp')) {
     token = localStorage.getItem('token') || '';
+    config.headers['userType'] = 2;
     if (token) config.headers['employeeToken'] = `Bearer ${token}`;
   }
   return config;

@@ -1,8 +1,8 @@
 export interface AuthLoginDTO {
   username: string;
   password: string;
-  captcha: string;
-  role: string;
+  code: string;
+  identity: string;
   kaptchaUuid: string;
 }
 

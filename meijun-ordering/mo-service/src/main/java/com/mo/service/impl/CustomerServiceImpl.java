@@ -22,7 +22,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> searchForCustomer(String name, Long id){
-        return customerMapper.searchForCustomer(name, id);
+    public List<Customer> searchForCustomer(String name){
+        return customerMapper.searchForCustomer(name);
     }
 }
