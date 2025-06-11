@@ -73,7 +73,7 @@ mybatis:
 
 logging:
   level:
-    com.mo.service.mapper: debug
+    com.mo.service.mapper: info
 # mo项目配置
 mo:
   jwt:

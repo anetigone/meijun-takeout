@@ -3,11 +3,20 @@ import Login from '../views/Login.vue';
 import DashboardAdm from '../views/Dashboard-adm.vue'; // 可以自行创建
 import DashboardMer from "../views/Dashboard-mer.vue";
 import DashboardEmp from "../views/Dashboard-emp.vue";
+import Index from "../views/index.vue";
 
 const routes = [
   {
     path: '/login',
     component: Login
+  },
+  {
+    path: '/',
+    redirect: '/index'
+  },
+  {
+    path: '/index',
+    component: Index
   },
   {
     path: '/adm-dashboard',
