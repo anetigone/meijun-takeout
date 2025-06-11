@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface CustomerMapper {
@@ -24,4 +25,6 @@ public interface CustomerMapper {
     List<Customer> getAllCustomer();
 
     List<Customer> searchForCustomer(String name);
+
+    Integer countByMap(@Param("map") Map<String, Object> map);
 }

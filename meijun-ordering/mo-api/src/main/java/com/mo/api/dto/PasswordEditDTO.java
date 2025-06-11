@@ -13,8 +13,8 @@ public class PasswordEditDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     //员工id
-    @Schema(description = "员工id")
-    private Long empId;
+    @Schema(description = "id")
+    private Long id;
     //旧密码
     @Schema(description = "旧密码")
     private String oldPassword;

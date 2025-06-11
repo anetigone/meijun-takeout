@@ -13,6 +13,7 @@ import com.mo.common.constant.MessageConstant;
 import com.mo.common.constant.RedisKeyConstant;
 import com.mo.common.context.BaseContext;
 import com.mo.common.enumeration.UserIdentity;
+import com.mo.common.exception.CaptchaExpiredException;
 import com.mo.common.exception.RedisAccessException;
 import com.mo.common.exception.UnknownIdentityException;
 import com.mo.common.exception.UserNotLoginException;
@@ -70,6 +71,11 @@ public class AuthController {
     public Result<AuthLoginVo> login(@RequestBody AuthLoginDTO authLoginDTO) {
         log.info("login:{}", authLoginDTO);
 
+        String code = authLoginDTO.getCode();
+        String uid = authLoginDTO.getUuid();
+        if (!checkCaptcha(code, uid))
+            throw new CaptchaExpiredException(MessageConstant.CAPTCHA_INCORRECT);
+
         User user = authService.login(authLoginDTO);
 
         Map<String, Object> claims = new HashMap<>();
@@ -89,7 +95,6 @@ public class AuthController {
         redisService.setEntity(uuid, user);
         BaseContext.setCurrentId(uuid);
         //todo 检查输入是否合法
-        //todo 验证码
         AuthLoginVo authLoginVo = AuthLoginVo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -258,5 +263,12 @@ public class AuthController {
             case MERCHANT -> jwtProperties.getMerchantTtl();
             default -> throw new UnknownIdentityException(MessageConstant.UNKNOWN_IDENTITY);
         };
+    }
+
+    private boolean checkCaptcha(String uuid, String code) {
+        String captcha = (String) redisService.hGet(RedisKeyConstant.KAPTCHA, uuid);
+        if(captcha == null) throw new CaptchaExpiredException(MessageConstant.CAPTCHA_EXPIRED);
+
+        return captcha.equals(code);
     }
 }

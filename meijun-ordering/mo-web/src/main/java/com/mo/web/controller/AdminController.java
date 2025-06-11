@@ -4,6 +4,9 @@ import com.mo.api.dto.*;
 import com.mo.api.service.AdminService;
 import com.mo.api.service.EmployeeService;
 import com.mo.api.service.StatisticService;
+import com.mo.api.service.WorkspaceService;
+import com.mo.api.vo.OrderOverviewVO;
+import com.mo.api.vo.WorkspaceDataVO;
 import com.mo.common.enumeration.UserIdentity;
 import com.mo.common.result.PageResult;
 import com.mo.common.result.Result;
@@ -23,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -36,6 +41,8 @@ public class AdminController {
     private StatisticService statisticService;
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private WorkspaceService workspaceService;
 
     @Operation(summary = "获取所有管理员")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Admin.class)))
@@ -193,5 +200,22 @@ public class AdminController {
          employeeService.deleteEmployee(id);
 
          return Result.success();
+    }
+
+    @GetMapping("/workspace/data")
+    public Result<WorkspaceDataVO> getWorkspaceData(){
+        LocalDateTime begin = LocalDateTime.now().with(LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now().with(LocalTime.MAX);
+
+        WorkspaceDataVO workspaceDataVO = workspaceService.getWorkspaceData(begin, end);
+
+        return Result.success(workspaceDataVO);
+    }
+
+    @GetMapping("/workspace/order/overview")
+    public Result<OrderOverviewVO> getOrderOverview(){
+        OrderOverviewVO orderOverviewVO = workspaceService.getOrderOverview();
+
+        return Result.success(orderOverviewVO);
     }
 }

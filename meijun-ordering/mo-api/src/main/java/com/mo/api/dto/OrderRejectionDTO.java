@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Schema(name = "订单拒绝参数")
 @Data
-public class OrdersRejectionDTO implements Serializable {
+public class OrderRejectionDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

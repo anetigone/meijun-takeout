@@ -1,7 +1,9 @@
 package com.mo.service.impl;
 
+import com.mo.api.dto.OrderCancelDTO;
+import com.mo.api.dto.OrderConfirmDTO;
+import com.mo.api.dto.OrderRejectionDTO;
 import com.mo.api.service.OrderService;
-import com.mo.api.service.PaymentService;
 import com.mo.api.vo.OrderSubmitVO;
 import com.mo.common.constant.MessageConstant;
 import com.mo.common.enumeration.OrderPayStaus;
@@ -33,11 +35,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderDetailMapper orderDetailMapper;
     @Autowired
-    private CartMapper cartMapper;
+    private DishMapper dishMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
-    @Autowired
-    private PaymentService paymentService;
     @Autowired
     private CustomerMapper customerMapper;
 
@@ -143,6 +143,15 @@ public class OrderServiceImpl implements OrderService {
             orderDetailMapper.saveOrderDetail(detail);
         }
 
+        for(OrderDetail detail: details){
+            Long id = detail.getItemId();
+            Integer quantity = detail.getQuantity();
+            Dish dish = dishMapper.getDishById(id);
+            dish.setSale(dish.getSale() + quantity);
+            dish.setUpdateTime(LocalDateTime.now());
+            dishMapper.updateDish(dish);
+        }
+
         //  删除购物车
         cartItemMapper.deleteCartItemByUserId(userId);
 
@@ -190,5 +199,29 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderMapper.updateOrder(newOrder);
+    }
+
+    @Override
+    public void confirm(OrderConfirmDTO orderConfirmDTO) {
+        Order order = new Order();
+        BeanUtils.copyProperties(orderConfirmDTO, order);
+
+        orderMapper.updateOrder(order);
+    }
+
+    @Override
+    public void rejection(OrderRejectionDTO ordersRejectionDTO) {
+        Order order = new Order();
+        BeanUtils.copyProperties(ordersRejectionDTO, order);
+
+        orderMapper.updateOrder(order);
+    }
+
+    @Override
+    public void cancel(OrderCancelDTO ordersCancelDTO) {
+        Order order = new Order();
+        BeanUtils.copyProperties(ordersCancelDTO, order);
+
+        orderMapper.updateOrder(order);
     }
 }

@@ -17,9 +17,9 @@ public class EmployeePageQueryDTO implements Serializable {
     private String name;
     //页码
     @Schema(description = "页码")
-    private int pageNum;
+    private int pageNum = 1;
     //每页显示记录数
     @Schema(description = "每页显示记录数")
-    private int pageSize;
+    private int pageSize = 10;
 
 }

@@ -16,6 +16,8 @@ public class AuthLoginDTO implements Serializable {
     private String password;
     @Schema(description = "验证码")
     private String code;
+    @Schema(description = "验证码的uuid")
+    private String uuid;
     @Schema(description = "用户身份")
     private UserIdentity identity;
 }

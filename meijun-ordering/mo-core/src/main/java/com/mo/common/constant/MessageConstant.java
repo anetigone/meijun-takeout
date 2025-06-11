@@ -25,4 +25,6 @@ public class MessageConstant {
     public static final String UNABLE_TO_CANCEL_ORDER_REASON1 = "派送中，无法取消";
     public static final String UNABLE_TO_CANCEL_ORDER_REASON2 = "已完成，无法取消";
     public static final String UNABLE_TO_CANCEL_ORDER_REASON3 = "已取消，无法重复取消";
+    public static final String CAPTCHA_EXPIRED = "验证码已过期";
+    public static final String CAPTCHA_INCORRECT = "验证码错误";
 }

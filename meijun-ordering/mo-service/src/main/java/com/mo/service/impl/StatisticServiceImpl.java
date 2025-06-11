@@ -23,11 +23,20 @@ public class StatisticServiceImpl implements StatisticService {
         this.orderMapper = orderMapper;
     }
 
+    /**
+     * 获取销售报表
+     * 该方法通过聚合订单详情来计算每个产品的总销量
+     *
+     * @return 包含所有产品销售信息的列表
+     */
     @Override
     public List<Product> getSales() {
+        // 获取所有订单详情
         List<OrderDetail> details = orderDetailMapper.getAllOrderDetail();
 
+        // 使用Stream API对订单详情进行处理，聚合每个产品的销售数量
         Map<Long, Product> map = details.stream()
+                // 将每个订单详情转换为Product对象，并用其itemId作为键创建一个Map
                 .map(detail -> {
                     Product product = Product.builder()
                             .productId(detail.getItemId())
@@ -37,6 +46,7 @@ public class StatisticServiceImpl implements StatisticService {
                             .build();
                     return Map.of(detail.getItemId(), product);
                 })
+                // 使用reduce方法将所有Map合并为一个，合并时将相同产品的销售数量相加
                 .reduce(new HashMap<>(), (map1, map2) -> {
                     map2.forEach((k, v) -> map1.merge(k, v, (v1, v2) -> {
                         v1.setSales(v1.getSales() + v2.getSales());
@@ -45,8 +55,10 @@ public class StatisticServiceImpl implements StatisticService {
                     return map1;
                 });
 
+        // 将聚合后的Product对象收集到一个列表中并返回
         return map.values().stream().toList();
     }
+
 
     @Override
     public int getTraffic() {

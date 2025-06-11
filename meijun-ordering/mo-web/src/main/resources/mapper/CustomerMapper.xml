@@ -23,6 +23,11 @@
                 username like concat('%',#{name},'%')
             </if>
     </select>
+    <select id="countByMap" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select count(*) from customers
+        where createTime &gt; #{map.begin}
+        and createTime &lt; #{map.end}
+    </select>
 
     <update id="updateCustomer" parameterType="com.mo.entity.Customer">
         update customers

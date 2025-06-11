@@ -31,7 +31,7 @@ public class DishController {
     private DishService dishService;
 
     @Operation(summary = "获取菜品分类")
-    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = List.class)))
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Dish.class)))
     @GetMapping("/categories")
     public Result<List<Dish>> getCategories(){
         List<Dish> dishes = dishService.getCategories();
@@ -43,7 +43,7 @@ public class DishController {
     @Parameters({
             @Parameter(name = "dishPageQueryDTO", schema = @Schema(implementation = DishPageQueryDTO.class))
     })
-    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = PageResult.class)))
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Dish.class)))
     @GetMapping("/page")
     public PageResult getPage(DishPageQueryDTO dishPageQueryDTO){
         int pageNum = dishPageQueryDTO.getPageNum();
@@ -56,11 +56,20 @@ public class DishController {
         return PageResult.success(list.size(), list, pageNum, pageSize);
     }
 
+    @Operation(summary = "获取推荐菜品")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Dish.class)))
+    @GetMapping("/recommendations")
+    public Result<List<Dish>> getRecommendations(){
+        List<Dish> dishes = dishService.getRecommendations();
+
+        return Result.success(dishes);
+    }
+
     @Operation(summary = "添加菜品")
     @Parameters({
             @Parameter(name = "dishDTO", schema = @Schema(implementation = DishDTO.class))
     })
-    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Result.class)))
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
     @PostMapping("/save")
     public Result<String> saveDish(@RequestBody DishDTO dishDTO){
         Dish dish = new Dish();

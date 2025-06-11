@@ -18,4 +18,6 @@ public interface DishMapper {
     Dish getDishById(@Param("id") Long id);
 
     void saveDish(@Param("dish") Dish dish);
+
+    void updateDish(@Param("dish") Dish dish);
 }

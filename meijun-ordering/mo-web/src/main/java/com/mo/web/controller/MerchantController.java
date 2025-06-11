@@ -3,7 +3,9 @@ package com.mo.web.controller;
 import com.mo.api.dto.*;
 import com.mo.api.service.*;
 import com.mo.api.vo.CouponVO;
+import com.mo.api.vo.OrderOverviewVO;
 import com.mo.api.vo.PromotionVO;
+import com.mo.api.vo.WorkspaceDataVO;
 import com.mo.common.constant.MessageConstant;
 import com.mo.common.enumeration.AfterSaleStatus;
 import com.mo.common.enumeration.OrderStatus;
@@ -24,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -49,6 +53,8 @@ public class MerchantController {
     private PromotionService promotionService;
     @Autowired
     private StatisticService statisticService;
+    @Autowired
+    private WorkspaceService workspaceService;
 
     @Operation(summary = "获取商户订单列表")
     @Parameters({
@@ -85,6 +91,40 @@ public class MerchantController {
         redisService.del("order:" + orderId);
 
         return Result.success(order);
+    }
+
+    /**
+     * 接单
+     *
+     * @return
+     */
+    @Operation(summary = "接单")
+    @PutMapping("/confirm")
+    public Result<String> confirm(@RequestBody OrderConfirmDTO orderConfirmDTO) {
+        orderService.confirm(orderConfirmDTO);
+        return Result.success();
+    }
+    /**
+     * 拒单
+     *
+     * @return
+     */
+    @Operation(summary = "拒单")
+    @PutMapping("/rejection")
+    public Result<String> rejection(@RequestBody OrderRejectionDTO ordersRejectionDTO) throws Exception {
+        orderService.rejection(ordersRejectionDTO);
+        return Result.success();
+    }
+    /**
+     * 取消订单
+     *
+     * @return
+     */
+    @Operation(summary = "取消订单")
+    @PutMapping("/cancel")
+    public Result<String> cancel(@RequestBody OrderCancelDTO ordersCancelDTO) throws Exception {
+        orderService.cancel(ordersCancelDTO);
+        return Result.success();
     }
 
     @Operation(summary = "获取所有员工")
@@ -399,5 +439,22 @@ public class MerchantController {
         BigDecimal res = BigDecimal.valueOf(total);
 
         return Result.success(res);
+    }
+
+    @GetMapping("/workspace/data")
+    public Result<WorkspaceDataVO> getWorkspaceData(){
+        LocalDateTime begin = LocalDateTime.now().with(LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now().with(LocalTime.MAX);
+
+        WorkspaceDataVO workspaceDataVO = workspaceService.getWorkspaceData(begin, end);
+
+        return Result.success(workspaceDataVO);
+    }
+
+    @GetMapping("/workspace/order/overview")
+    public Result<OrderOverviewVO> getOrderOverview(){
+        OrderOverviewVO orderOverviewVO = workspaceService.getOrderOverview();
+
+        return Result.success(orderOverviewVO);
     }
 }

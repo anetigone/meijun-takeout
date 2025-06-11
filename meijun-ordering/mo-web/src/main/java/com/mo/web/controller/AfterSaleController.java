@@ -32,6 +32,7 @@ public class AfterSaleController {
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
     @PostMapping("/save")
     public Result<String> saveAfterSale(@RequestBody AfterSaleDTO afterSaleDTO) {
+        log.info("保存售后请求: {}", afterSaleDTO);
         AfterSale afterSale = new AfterSale();
         BeanUtils.copyProperties(afterSaleDTO, afterSale);
         afterSaleService.saveAfterSale(afterSale);
@@ -40,14 +41,16 @@ public class AfterSaleController {
 
     @Operation(summary = "更新售后请求")
     @Parameters({
-            @Parameter(name = "afterSaleDTO", description = "售后参数", required = true, schema = @Schema(implementation = AfterSaleDTO.class))
+            @Parameter(name = "afterSaleDTO", description = "售后参数", required = true, schema = @Schema(implementation = AfterSaleDTO.class)),
+            @Parameter(name = "requestId", description = "售后请求id", required = true, schema = @Schema(implementation = Long.class))
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
     @PostMapping("/update/{requestId}")
     public Result<String> updateAfterSale(@RequestBody AfterSaleDTO afterSaleDTO, @PathVariable Long requestId) {
+        log.info("更新售后请求: {}", afterSaleDTO);
         AfterSale afterSale = new AfterSale();
         BeanUtils.copyProperties(afterSaleDTO, afterSale);
-        afterSale.setOrderId(requestId);
+        afterSale.setId(requestId);
         afterSaleService.updateAfterSale(afterSale);
         return Result.success();
     }
@@ -57,6 +60,7 @@ public class AfterSaleController {
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
     @PostMapping("/delete/{requestId}")
     public Result<String> deleteAfterSale(@PathVariable Long requestId) {
+        log.info("删除售后请求: {}", requestId);
         afterSaleService.deleteAfterSale(requestId);
 
         return Result.success();
@@ -65,8 +69,9 @@ public class AfterSaleController {
     @Operation(summary = "获取售后请求状态")
     @Parameter(name = "requestId", description = "售后请求id", required = true, schema = @Schema(implementation = Long.class))
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = AfterSaleStatus.class)))
-    @PostMapping("/status/{requestId}")
+    @GetMapping("/status/{requestId}")
     public Result<AfterSaleStatus> getAfterSaleStatus(@PathVariable Long requestId) {
+        log.info("获取售后请求状态: {}", requestId);
         AfterSale sale = afterSaleService.getAfterSaleById(requestId);
 
         return Result.success(sale.getStatus());

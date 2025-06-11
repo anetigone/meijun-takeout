@@ -1,5 +1,6 @@
 package com.mo.api.dto;
 
+import com.mo.common.enumeration.PayMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -17,6 +18,6 @@ public class OrdersPaymentDTO implements Serializable {
     private String orderNumber;
     //付款方式
     @Schema(description = "付款方式")
-    private Integer payMethod;
+    private PayMethod payMethod;
 
 }

@@ -35,6 +35,34 @@
             </if>
         </where>
     </select>
+    <select id="countByMap" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select count(*) from orders
+        where orderTime &gt; #{map.begin}
+        and orderTime &lt; #{map.end}
+        <if test="map.status!=null">
+            and status = #{map.status}
+        </if>
+    </select>
+    <select id="sunByMap" resultType="java.lang.Double" parameterType="java.util.Map">
+        select sum(total) from orders
+        where orderTime &gt; #{map.begin}
+        and orderTime &lt; #{map.end}
+        <if test="map.status!=null">
+            and status = #{map.status}
+        </if>
+    </select>
+    <select id="getByStatusAndOrderTimeBefore" resultType="com.mo.entity.Order">
+        select * ,customer_id as userId
+        from orders
+        <where>
+            <if test="begin != null">
+                orderTime &lt; #{begin}
+            </if>
+            <if test="status != null">
+                and `status` = #{status}
+            </if>
+        </where>
+    </select>
 
     <update id="updateOrder">
         update orders

@@ -17,7 +17,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class AfterSaleDTO implements Serializable {
 
-    @Schema(description = "售后id")
+    @Schema(description = "订单id")
     private Long orderId;
     @Schema(description = "用户id")
     private Long userId;

@@ -33,4 +33,34 @@
         values(#{dish.name},#{dish.categoryId},#{dish.price},#{dish.image},#{dish.description},
                #{dish.status},#{dish.sale},#{dish.createTime},#{dish.updateTime},#{dish.createUser},#{dish.updateUser})
     </insert>
+
+    <update id="updateDish" parameterType="com.mo.entity.Dish">
+        update dishes
+        <set>
+            <if test="dish.name != null">
+                name = #{dish.name},
+            </if>
+            <if test="dish.categoryId != null">
+                category_id = #{dish.categoryId},
+            </if>
+            <if test="dish.sale != null">
+                sale = #{dish.sale},
+            </if>
+            <if test="dish.price != null">
+                price = #{dish.price},
+            </if>
+            <if test="dish.image != null">
+                image = #{dish.image},
+            </if>
+            <if test="dish.description != null">
+                description = #{dish.description},
+            </if>
+            <if test="dish.status != null">
+                status = #{dish.status},
+            </if>
+            <if test="dish.updateTime != null">
+                updateTime = #{dish.updateTime},
+            </if>
+        </set>
+    </update>
 </mapper>

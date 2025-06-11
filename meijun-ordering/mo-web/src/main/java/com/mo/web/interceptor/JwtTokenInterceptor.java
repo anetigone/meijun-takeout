@@ -55,6 +55,7 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
         }
 
         try{
+            if(token.startsWith("Bearer ")) token = token.substring(7);
             Jws<Claims> jws = JwtUtil.parseJwt(key, token);
             Claims claims = jws.getPayload();
             request.setAttribute("claims:", claims);

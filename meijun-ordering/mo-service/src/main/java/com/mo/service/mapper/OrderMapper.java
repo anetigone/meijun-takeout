@@ -1,11 +1,14 @@
 package com.mo.service.mapper;
 
+import com.mo.common.enumeration.OrderStatus;
 import com.mo.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -25,4 +28,10 @@ public interface OrderMapper {
     List<Order> getOrderByUserId(Long userId);
 
     List<Order> getPage(int offset, int size);
+
+    Integer countByMap(@Param("map") Map<String, Object> map);
+
+    Double sumByMap(@Param("map") Map<String, Object> map);
+
+    List<Order> getByStatusAndOrderTimeBefore(OrderStatus status, LocalDateTime begin);
 }

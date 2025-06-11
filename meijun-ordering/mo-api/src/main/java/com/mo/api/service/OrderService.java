@@ -1,5 +1,8 @@
 package com.mo.api.service;
 
+import com.mo.api.dto.OrderCancelDTO;
+import com.mo.api.dto.OrderConfirmDTO;
+import com.mo.api.dto.OrderRejectionDTO;
 import com.mo.api.vo.OrderSubmitVO;
 import com.mo.entity.AfterSale;
 import com.mo.entity.Order;
@@ -43,4 +46,10 @@ public interface OrderService {
     void refund(Long orderId);
 
     void cancelOrder(Long orderId);
+
+    void confirm(OrderConfirmDTO orderConfirmDTO);
+
+    void rejection(OrderRejectionDTO ordersRejectionDTO);
+
+    void cancel(OrderCancelDTO ordersCancelDTO);
 }
