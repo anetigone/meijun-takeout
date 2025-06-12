@@ -40,11 +40,13 @@ const router = createRouter({
   routes
 });
 
+const path = '/login';
+
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   if (to.meta.requiresAuth && !token) {
-    next('/login');
+    next(path);
   } else {
     next();
   }

@@ -2,6 +2,7 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "cSpell.words": [
         "axios",
+        "baos",
         "Kaptcha"
     ]
 }
