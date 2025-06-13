@@ -7,3 +7,6 @@ export const login = (data: AuthLoginDTO) =>
 
 export const getCaptchaBase64 = () =>
   request.get<ApiResponse<KaptchaVO>>('/auth/base64-captcha');
+
+export const logoutApi = () =>
+    request.post('/auth/logout');

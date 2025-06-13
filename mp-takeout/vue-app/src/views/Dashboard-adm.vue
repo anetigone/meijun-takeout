@@ -1,6 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import { getAdmins, getAdminsByPage, getEmployees, getOrderOverview, getSales, getSalesTotal, getTraffic, getWorkspaceData, removeAdmin, removeEmployee } from '../api/admin';
+import { checkAuthExpired } from '../utils/authStorage.ts';
 
 export default defineComponent({
   name: "DashboardAdm"
@@ -8,6 +9,12 @@ export default defineComponent({
 </script>
 
 <template>
+  <el-header height="48px" class="sub-header">
+    <div class="user-info">
+      <span>当前用户：{{ currentAdmin.username || '未登录' }}</span>
+      <el-button size="small" type="danger" @click="logout">退出登录</el-button>
+    </div>
+  </el-header>
   <el-container>
     <el-aside width="200px" class="dashboard-aside">
       <el-menu :default-active="activeMenu" class="el-menu-vertical-demo" @select="handleMenuSelect">
@@ -47,7 +54,10 @@ export default defineComponent({
         <el-card>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: bold;">管理员列表</span>
-            <el-button type="primary" @click="fetchAdmins()">刷新</el-button>
+            <div>
+              <el-button type="primary" @click="fetchAdmins()">刷新</el-button>
+              <el-button type="success" @click="handleAddAdmin()" style="margin-left: 8px;">添加管理员</el-button>
+            </div>
           </div>
           <el-table :data="adminList" style="width: 100%; margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
@@ -58,7 +68,11 @@ export default defineComponent({
                 <span>{{ scope.row.password ? '******' : '未设置' }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="email" label="邮箱" width="240"/>
+            <el-table-column prop="email" label="邮箱" width="240">
+              <template #default="scope">
+                <span>{{ scope.row.email || '未设置' }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="createTime" label="创建时间"/>
             <el-table-column prop="updateTime" label="更新时间"/>
             <el-table-column prop="role" label="角色">
@@ -74,6 +88,16 @@ export default defineComponent({
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+              style="margin-top: 16px; text-align: right"
+              background
+              layout="prev, pager, next, sizes, total"
+              :current-page="adminPage"
+              :page-size="adminPageSize"
+              :total="adminTotal"
+              @current-change="onAdminPageChange"
+              @size-change="onAdminSizeChange"
+            />
         </el-card>
       </div>
       <!-- 员工管理 -->
@@ -81,18 +105,47 @@ export default defineComponent({
         <el-card>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: bold;">员工列表</span>
-            <el-button type="primary" @click="fetchEmployees()">刷新</el-button>
+            <div>
+              <el-button type="primary" @click="fetchEmployees()">刷新</el-button>
+              <el-button type="success" @click="handleAddEmployee" style="margin-left: 8px;">添加员工</el-button>
+            </div>
           </div>
           <el-table :data="employeeList" style="width: 100%; margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
+            <el-table-column prop="uuid" label="UUID" width="240"/>
+            <el-table-column prop="username" label="用户名" width="240"/>
+            <el-table-column prop="password" label="密码" width="240">
+              <template #default="scope">
+                <span>{{ scope.row.password ? '******' : '未设置' }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="name" label="姓名"/>
             <el-table-column prop="phone" label="电话"/>
+            <el-table-column prop="status" label="状态">
+              <template #default="scope">
+                <span>{{ scope.row.status === 'active' ? '启用' : '禁用' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间"/>
+            <el-table-column prop="updateTime" label="更新时间"/>
             <el-table-column label="操作" width="120">
               <template #default="scope">
+                <el-button size="small" type="info" @click="handleViewEmployee(scope.row)">查看</el-button>
+                <el-button size="small" type="primary" @click="handleEditEmployee(scope.row)">更新</el-button>
                 <el-button size="small" type="danger" @click="deleteEmployee(scope.row.id)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+              style="margin-top: 16px; text-align: right"
+              background
+              layout="prev, pager, next, sizes, total"
+              :current-page="employeePage"
+              :page-size="employeePageSize"
+              :total="employeeTotal"
+              @current-change="onEmployeePageChange"
+              @size-change="onEmployeeSizeChange"
+           />
         </el-card>
       </div>
       <!-- 销售统计 -->
@@ -151,13 +204,40 @@ export default defineComponent({
       <el-button @click="adminDialogVisible = false">取消</el-button>
     </template>
   </el-dialog>
+  <!-- 员工查看/编辑弹窗 -->
+  <el-dialog v-model="employeeDialogVisible" :title="employeeDialogMode === 'view' ? '查看员工' : '更新员工'" width="400px">
+    <el-form v-if="employeeDialogMode === 'edit'" :model="employeeForm" label-width="80px">
+      <el-form-item label="用户名">
+        <el-input v-model="employeeForm.username" />
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="employeeForm.password" />
+      </el-form-item>
+      <el-form-item label="密码">
+        <el-input v-model="employeeForm.password" type="password" show-password />
+      </el-form-item>
+    </el-form>
+    <div v-else>
+      <p><b>ID:</b>{{ employeeForm.id }}</p>
+      <p><b>用户名:</b>{{ employeeForm.username }}</p>
+      <p><b>创建时间:</b>{{ employeeForm.createTime }}</p>
+      <p><b>更新时间:</b>{{ employeeForm.updateTime }}</p>
+    </div>
+    <template #footer>
+      <el-button v-if="employeeDialogMode === 'view'" @click="employeeDialogMode = 'edit'">修改</el-button>
+      <el-button v-if="employeeDialogMode === 'edit'" type="primary" @click="submitEmployeeUpdate">确认</el-button>
+      <el-button @click="employeeDialogVisible = false">取消</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { upgradeAdmin, getAdminById } from '../api/admin'
+import { upgradeAdmin, getAdminById, getEmployeeById, upgradeEmployee, getEmployeesByPage } from '../api/admin'
 import type { Admin, Employee, Product } from '../api/types'
+import router from "../router";
+import {logoutApi} from "../api/auth.ts";
 
 const activeMenu = ref('workspace')
 const workspaceData = ref()
@@ -170,6 +250,16 @@ const traffic = ref(0)
 const adminDialogVisible = ref(false)
 const adminDialogMode = ref<'view' | 'edit'>('view')
 const adminForm = ref<Partial<Admin>>({})
+const employeeDialogVisible = ref(false)
+const employeeDialogMode = ref<'view' | 'edit'>('view')
+const employeeForm = ref<Partial<Employee>>({})
+const adminPage = ref(1)
+const adminPageSize = ref(10)
+const adminTotal = ref(0)
+const employeePage = ref(1)
+const employeePageSize = ref(10)
+const employeeTotal = ref(0)
+const currentAdmin = ref<Partial<Admin>>({})
 
 // 工作台数据
 const fetchWorkspaceData = async () => {
@@ -193,7 +283,17 @@ const fetchAdminPage = async (page:number, size:number) => {
     pageSize: size
   }
   const res = await getAdminsByPage(dto)
-  adminList.value = res.data.records
+  adminTotal.value = res.data.total
+  adminPage.value = res.data.current
+  adminPageSize.value = res.data.size
+}
+const onAdminPageChange = async (page: number) => {
+  adminPage.value = page
+  await fetchAdminPage(page, adminPageSize.value)
+}
+const onAdminSizeChange = async (size: number) => {
+  adminPageSize.value = size
+  await fetchAdminPage(adminPage.value, size)
 }
 // 删除管理员
 const deleteAdmin = async (id: number) => {
@@ -212,6 +312,21 @@ const deleteAdmin = async (id: number) => {
 const fetchEmployees = async () => {
   const res = await getEmployees()
   employeeList.value = res.data.data
+}
+// 员工分页
+const fetchEmployeePage = async (page = 1, size = 10) => {
+  const dto = { pageNum: page, pageSize: size }
+  const res = await getEmployeesByPage(dto)
+  employeeList.value = res.data.records
+  employeeTotal.value = res.data.total
+  employeePage.value = res.data.current
+  employeePageSize.value = res.data.size
+}
+const onEmployeePageChange = (page: number) => {
+  fetchEmployeePage(page, employeePageSize.value)
+}
+const onEmployeeSizeChange = (size: number) => {
+  fetchEmployeePage(1, size)
 }
 // 删除员工
 const deleteEmployee = async (id: number) => {
@@ -234,15 +349,15 @@ const fetchStats = async () => {
   traffic.value = trafficRes.data.data
 }
 
-// 菜单切换
+// 菜单切换时加载第一页
 const handleMenuSelect = (key: string) => {
   activeMenu.value = key
   if (key === 'workspace') {
     fetchWorkspaceData()
     fetchOrderOverview()
   }
-  if (key === 'admin') fetchAdmins()
-  if (key === 'employee') fetchEmployees()
+  if (key === 'admin') fetchAdminPage(1, adminPageSize.value)
+  if (key === 'employee') fetchEmployeePage(1, employeePageSize.value)
   if (key === 'stat') fetchStats()
 }
 
@@ -260,6 +375,12 @@ const handleEditAdmin = (row: Admin) => {
   adminDialogMode.value = 'edit'
   adminDialogVisible.value = true
 }
+// 添加管理员
+const handleAddAdmin = () => {
+  adminForm.value = {};
+  adminDialogMode.value = 'edit';
+  adminDialogVisible.value = true;
+};
 
 // 提交更新
 const submitAdminUpdate = async () => {
@@ -267,15 +388,69 @@ const submitAdminUpdate = async () => {
     await upgradeAdmin(adminForm.value)
     ElMessage.success('更新成功')
     adminDialogVisible.value = false
-    fetchAdmins()
+    await fetchAdmins()
   } catch (e) {
     ElMessage.error('更新失败')
   }
 }
 
+const handleViewEmployee = async (row: Employee) => {
+  const res = await getEmployeeById(row.id!)
+  employeeForm.value = { ...res.data.data }
+  employeeDialogMode.value = 'view'
+  employeeDialogVisible.value = true
+}
+
+const handleEditEmployee = (row: Employee) => {
+  employeeForm.value = { ...row }
+  employeeDialogMode.value = 'edit'
+  employeeDialogVisible.value = true
+}
+// 添加员工
+const handleAddEmployee = () => {
+  employeeForm.value = {};
+  employeeDialogMode.value = 'edit';
+  employeeDialogVisible.value = true;
+};
+
+const submitEmployeeUpdate = async () => {
+  try {
+    await upgradeEmployee(employeeForm.value)
+    ElMessage.success('更新成功')
+    employeeDialogVisible.value = false
+    await fetchEmployees()
+  } catch (e) {
+    ElMessage.error('更新失败')
+  }
+}
+
+const logout = () => {
+  ElMessageBox.confirm('确定退出登录吗？', '提示', { type: 'warning' })
+    .then(async () => {
+      await logoutApi()
+      ElMessage.success('退出成功')
+      localStorage.removeItem('token')
+      localStorage.removeItem('uuid')
+      await router.push('/index')
+    })
+}
+
 onMounted(() => {
+  if(!checkAuthExpired) {
+    ElMessage.error('登录已过期，请重新登录')
+    router.push('/login')
+    return
+  }
+  const storedUsername = localStorage.getItem('username');
+  if (storedUsername) {
+    currentAdmin.value.username = storedUsername;
+  }
+  // console.log(currentAdmin.value.username)
   fetchWorkspaceData()
   fetchOrderOverview()
+  // 初始加载管理员和员工数据
+  fetchAdminPage(1, adminPageSize.value)
+  fetchEmployeePage(1, employeePageSize.value)
 })
 </script>
 
@@ -285,7 +460,24 @@ onMounted(() => {
   min-height: 100vh;
   border-right: 1px solid #ebeef5;
 }
+
 .el-main {
   background: #f9f9f9;
 }
+
+.sub-header {
+  background-color: #f5f7fa;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 </style>

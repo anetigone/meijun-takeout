@@ -43,7 +43,7 @@
             and status = #{map.status}
         </if>
     </select>
-    <select id="sunByMap" resultType="java.lang.Double" parameterType="java.util.Map">
+    <select id="sumByMap" resultType="java.lang.Double" parameterType="java.util.Map">
         select sum(total) from orders
         where orderTime &gt; #{map.begin}
         and orderTime &lt; #{map.end}

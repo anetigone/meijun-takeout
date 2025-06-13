@@ -73,7 +73,7 @@ public class AuthController {
 
         String code = authLoginDTO.getCode();
         String uid = authLoginDTO.getUuid();
-        if (!checkCaptcha(code, uid))
+        if (!checkCaptcha(uid, code))
             throw new CaptchaExpiredException(MessageConstant.CAPTCHA_INCORRECT);
 
         User user = authService.login(authLoginDTO);
@@ -213,7 +213,8 @@ public class AuthController {
         base64 = "data:image/jpeg;base64," + base64;
 
         String uuid = UUID.randomUUID().toString();
-        redisService.hSet(RedisKeyConstant.KAPTCHA, uuid, base64, CaptchaConstant.CAPTCHA_EXPIRE_TIME);
+        log.info("uuid: {}", uuid);
+        redisService.hSet(RedisKeyConstant.KAPTCHA, uuid, text, CaptchaConstant.CAPTCHA_EXPIRE_TIME);
 
         KaptchaVO kaptchaVO = KaptchaVO.builder()
                 .uuid(uuid)

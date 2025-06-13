@@ -33,7 +33,6 @@ export const getOrderOverview = () =>
 
 export const getEmployees = () =>
   request.get<ApiResponse<Employee[]>>('/admin/employee/all')
-
 export const removeEmployee = (id: number) =>
   request.delete<ApiResponse<any>>(`/admin/employee/${id}/delete`)
 

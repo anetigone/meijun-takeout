@@ -3,7 +3,7 @@ export interface AuthLoginDTO {
   password: string;
   code: string;
   identity: string;
-  kaptchaUuid: string;
+  uuid: string;
 }
 
 export interface AuthLoginVo {

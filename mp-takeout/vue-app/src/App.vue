@@ -1,7 +1,7 @@
 <!-- src/App.vue -->
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { ElContainer, ElHeader, ElMain, ElAside, ElMenu, ElMenuItem } from 'element-plus'
+import { ElContainer, ElHeader, ElMain, ElAside, ElMenu, ElMenuItem, ElPagination } from 'element-plus'
 </script>
 
 <template>

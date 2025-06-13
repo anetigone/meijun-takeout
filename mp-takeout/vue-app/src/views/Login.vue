@@ -39,6 +39,7 @@ import { useRouter } from 'vue-router';
 import { login, getCaptchaBase64 } from '../api/auth';
 import { ElMessage } from 'element-plus';
 import type {AuthLoginDTO} from "../api/types.ts";
+import { setAuth } from '../utils/authStorage.ts';
 
 const router = useRouter();
 const captchaUrl = ref('');
@@ -48,7 +49,7 @@ const form = ref<AuthLoginDTO>({
   password: '',
   code: '',
   identity: '',
-  kaptchaUuid: ''
+  uuid: ''
 });
 const formRef = ref();
 
@@ -65,7 +66,8 @@ const fetchCaptcha = async () => {
     const data = res.data.data;
     captchaUrl.value = data.code;
     kaptchaUuid.value = data.uuid;
-    form.value.kaptchaUuid = kaptchaUuid.value; // 更新表单中的kaptchaUuid
+    console.log(kaptchaUuid.value);
+    form.value.uuid = kaptchaUuid.value; // 更新表单中的kaptchaUuid
   } catch (error) {
     ElMessage.error('获取验证码失败');
   }
@@ -73,7 +75,8 @@ const fetchCaptcha = async () => {
 
 const handleLogin = async () => {
   try {
-    form.value.kaptchaUuid = kaptchaUuid.value; // 确保kaptchaUuid在登录时是最新的
+    form.value.uuid = kaptchaUuid.value; // 确保kaptchaUuid在登录时是最新的
+    console.log(form.value);
     const res = await login(form.value);
     const { token, uuid } = res.data.data;
     // 根据身份跳转到不同的页面
@@ -84,8 +87,13 @@ const handleLogin = async () => {
     } else if (form.value.identity.toLowerCase() === 'employee') {
       await router.push('/emp-dashboard');
     }
-    localStorage.setItem('uuid', uuid);
-    localStorage.setItem('token', token);
+    setAuth({
+      token,
+      uuid,
+      username: form.value.username,
+      userType: form.value.identity,
+      expireTime: 3600*1000
+    });
     ElMessage.success('登录成功');
   } catch (error) {
     ElMessage.error('登录失败，请检查用户名或密码');
