@@ -72,6 +72,19 @@ public class MerchantController {
         return Result.success(order);
     }
 
+    @GetMapping("/orders/page")
+    public PageResult getOrderPage(@RequestBody OrderPageQueryDTO orderPageQueryDTO){
+        int pageNum = orderPageQueryDTO.getPage();
+        int pageSize = orderPageQueryDTO.getSize();
+        int offset = (pageNum - 1) * pageSize;
+        int size = pageSize;
+
+        List<Order> list = orderService.getPage(offset, size);
+        int total = orderService.getOrderCount();
+
+        return PageResult.success(total, list, offset, size);
+    }
+
     @Operation(summary = "修改订单状态", description = "修改指定订单的状态")
     @Parameters({
             @Parameter(name = "orderId", description = "订单ID", required = true),
@@ -79,7 +92,7 @@ public class MerchantController {
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Order.class)))
     @PutMapping("/orders/{orderId}/status")
-    Result<Order> updateOrderStatus(@PathVariable Long orderId, @RequestParam Integer status){
+    public Result<Order> updateOrderStatus(@PathVariable Long orderId, @RequestParam Integer status){
         Order order = (Order) redisService.getEntity("order:" + orderId, Order.class);
         if(order == null) order = orderService.getOrderById(orderId);
         if(order == null) throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
@@ -111,8 +124,8 @@ public class MerchantController {
      */
     @Operation(summary = "拒单")
     @PutMapping("/rejection")
-    public Result<String> rejection(@RequestBody OrderRejectionDTO ordersRejectionDTO) throws Exception {
-        orderService.rejection(ordersRejectionDTO);
+    public Result<String> rejection(@RequestBody OrderRejectionDTO orderRejectionDTO) throws Exception {
+        orderService.rejection(orderRejectionDTO);
         return Result.success();
     }
     /**
@@ -122,8 +135,20 @@ public class MerchantController {
      */
     @Operation(summary = "取消订单")
     @PutMapping("/cancel")
-    public Result<String> cancel(@RequestBody OrderCancelDTO ordersCancelDTO) throws Exception {
-        orderService.cancel(ordersCancelDTO);
+    public Result<String> cancel(@RequestBody OrderCancelDTO orderCancelDTO) throws Exception {
+        orderService.cancel(orderCancelDTO);
+        return Result.success();
+    }
+
+    @PutMapping("/complete")
+    public Result<String> complete(@RequestBody OrderCompleteDTO orderCompleteDTO) throws Exception {
+        orderService.complete(orderCompleteDTO);
+        return Result.success();
+    }
+
+    @PutMapping("/deliver")
+    public Result<String> deliver(@RequestBody OrderDeliverDTO orderDeliverDTO) throws Exception {
+        orderService.deliver(orderDeliverDTO);
         return Result.success();
     }
 
@@ -149,8 +174,9 @@ public class MerchantController {
         int size = pageSize;
 
         List<Employee> list = employeeService.getEmployeePage(offset, size);
+        int total = employeeService.getEmployeeCount();
 
-        return PageResult.success(list.size(), list, pageNum, pageSize);
+        return PageResult.success(total, list, pageNum, pageSize);
     }
 
     @Operation(summary = "保存员工信息")
@@ -231,6 +257,19 @@ public class MerchantController {
         return  Result.success(list);
     }
 
+    @GetMapping("/users/page")
+    public PageResult getCustomerPage(@RequestBody CustomerPageQueryDTO customerPageQueryDTO) {
+        int pageNum = customerPageQueryDTO.getPageNum();
+        int pageSize = customerPageQueryDTO.getPageSize();
+        int offset = (pageNum - 1) * pageSize;
+        int size = pageSize;
+
+        List<Customer> list = customerService.getCustomerPage(offset, size);
+        int total = customerService.getCustomerCount();
+
+        return PageResult.success(total, list, pageNum, pageSize);
+    }
+
     @Operation(summary = "搜索用户")
     @Parameters ({
             @Parameter(name = "name", description = "用户名", required = true),
@@ -249,6 +288,18 @@ public class MerchantController {
     public Result<List<AfterSale>> getAfterSales() {
         return Result.success(afterSaleService.getAfterSales());
     }
+
+    public PageResult  getAfterSalePage(@RequestBody AfterSalePageQueryDTO afterSalePageQueryDTO) {
+        int pageNum = afterSalePageQueryDTO.getPageNum();
+        int pageSize = afterSalePageQueryDTO.getPageSize();
+        int offset = (pageNum - 1) * pageSize;
+        int size = pageSize;
+
+        List<AfterSale> list = afterSaleService.getAfterSalePage(offset, size);
+        int total = afterSaleService.getAfterSaleCount();
+
+        return PageResult.success(total, list, pageNum, pageSize);
+      }
 
     @Operation(summary = "审批售后")
     @Parameters({
@@ -379,7 +430,7 @@ public class MerchantController {
         BeanUtils.copyProperties(dto, promotion);
         promotionService.savePromotion(promotion);
 
-         PromotionVO promotionVO = PromotionVO.builder()
+        PromotionVO promotionVO = PromotionVO.builder()
                 .promotionId(promotion.getId())
                 .status("success")
                 .build();

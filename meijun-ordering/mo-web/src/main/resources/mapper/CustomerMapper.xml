@@ -28,6 +28,13 @@
         where createTime &gt; #{map.begin}
         and createTime &lt; #{map.end}
     </select>
+    <select id="getCustomerPage" resultType="com.mo.entity.Customer">
+        select * from customers
+        limit #{offset},#{size}
+    </select>
+    <select id="getCustomerCount" resultType="java.lang.Integer">
+        select count(*) from customers
+    </select>
 
     <update id="updateCustomer" parameterType="com.mo.entity.Customer">
         update customers

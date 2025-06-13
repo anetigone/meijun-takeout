@@ -63,12 +63,14 @@ const rules = {
 const fetchCaptcha = async () => {
   try {
     const res = await getCaptchaBase64();
+    console.log(res)
     const data = res.data.data;
     captchaUrl.value = data.code;
     kaptchaUuid.value = data.uuid;
     console.log(kaptchaUuid.value);
     form.value.uuid = kaptchaUuid.value; // 更新表单中的kaptchaUuid
   } catch (error) {
+    console.log(error);
     ElMessage.error('获取验证码失败');
   }
 };
@@ -96,6 +98,7 @@ const handleLogin = async () => {
     });
     ElMessage.success('登录成功');
   } catch (error) {
+    console.log(error);
     ElMessage.error('登录失败，请检查用户名或密码');
   }
 };

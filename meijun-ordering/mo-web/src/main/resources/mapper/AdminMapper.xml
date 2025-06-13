@@ -15,6 +15,9 @@
         select * from admins
         limit #{offset}, #{size}
     </select>
+    <select id="getAdminCount" resultType="java.lang.Integer">
+        select count(*) from admins
+    </select>
 
     <update id="updateAdmin" parameterType="com.mo.entity.Admin">
         update admins

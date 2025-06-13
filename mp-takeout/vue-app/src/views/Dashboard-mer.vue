@@ -1,4 +1,10 @@
 <template>
+  <el-header height="48px" class="sub-header">
+    <div class="user-info">
+      <span>当前用户：{{ currentEmployee.username || '未登录' }}</span>
+      <el-button size="small" type="danger" @click="logout">退出登录</el-button>
+    </div>
+  </el-header>
   <el-container>
     <el-aside width="200px" class="dashboard-aside">
       <el-menu :default-active="activeMenu" @select="handleMenuSelect">
@@ -16,22 +22,60 @@
       <div v-if="activeMenu === 'orders'">
         <el-card>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <el-input v-model="orderId" placeholder="输入订单ID查询" style="width: 200px;" />
+            <el-input v-model.number="orderId" placeholder="输入订单ID查询" style="width: 200px;" />
             <el-button type="primary" @click="fetchOrderById">查询订单</el-button>
+            <el-button v-if="isOrderSearchMode" @click="exitOrderSearch" type="info" size="small" style="margin-left: 10px;">
+              取消
+            </el-button>"
           </div>
-          <el-table v-if="order" :data="[order]" style="margin-top: 16px;">
+          <el-table :data="orderList" style="margin-top: 16px;">
             <el-table-column prop="id" label="订单ID" />
             <el-table-column prop="status" label="状态" />
-            <el-table-column prop="totalAmount" label="总价" />
-            <el-table-column label="操作">
+            <el-table-column prop="payStatus" label="支付状态" />
+            <el-table-column prop="orderTime" label="下单时间" />
+            <el-table-column prop="total" label="总价" />
+            <el-table-column label="操作" width="200">
               <template #default="scope">
-                <el-select v-model="orderStatus" placeholder="修改状态" size="small" style="width: 120px;">
-                  <el-option v-for="(label, value) in orderStatusMap" :key="value" :label="label" :value="value" />
-                </el-select>
-                <el-button size="small" @click="updateOrderStatus(scope.row.id)">更新</el-button>
+                <el-button size="small" @click="handleViewOrder(scope.row)">查看</el-button>
+                <el-button
+                  v-if="scope.row.status === 'pending'"
+                  size="small"
+                  type="primary"
+                  @click="showConfirmDialog(scope.row, '是否接单？', 'accept')"
+                >接单</el-button>
+                <el-button
+                  v-if="scope.row.status === 'pending'"
+                  size="small"
+                  type="danger"
+                  @click="showConfirmDialog(scope.row, '是否拒单？', 'reject')"
+                >拒单</el-button>
+                <el-button
+                  v-if="scope.row.status === 'confirmed'"
+                  size="small"
+                  type="success"
+                  @click="confirmStartDelivery(scope.row)"
+                >开始派送</el-button>
+                <el-button
+                  v-if="scope.row.status === 'delivering'"
+                  size="small"
+                  type="success"
+                  @click="confirmCompleteOrder(scope.row)"
+                >完成</el-button>
               </template>
             </el-table-column>
           </el-table>
+
+          <!-- 分页控件 -->
+          <el-pagination
+            style="margin-top: 16px; text-align: right"
+              background
+              layout="prev, pager, next, sizes, total"
+              :current-page="orderPage"
+              :page-size="orderPageSize"
+              :total="orderTotal"
+              @current-change="onOrderPageChange"
+              @size-change="onOrderSizeChange"
+          />
         </el-card>
       </div>
       <!-- 员工管理 -->
@@ -39,18 +83,37 @@
         <el-card>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span>员工列表</span>
-            <el-button type="primary" @click="fetchStaff">刷新</el-button>
+            <div>
+              <el-button type="primary" @click="fetchStaff">刷新</el-button>
+              <el-button type="success" @click="handleAddEmployee" style="margin-left: 8px;">添加员工</el-button>
+            </div>
           </div>
           <el-table :data="staffList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
             <el-table-column prop="name" label="姓名"/>
             <el-table-column prop="phone" label="电话"/>
+            <el-table-column prop="status" label="状态">
+              <template #default="scope">
+                <span>{{ scope.row.status === 'active' ? '启用' : '禁用' }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="120">
               <template #default="scope">
-                <el-button size="small" type="danger" @click="deleteStaff(scope.row.id)">删除</el-button>
+                <el-button size="small" type="info" @click="handleViewEmployee(scope.row)">查看</el-button>
+                <el-button size="small" type="primary" @click="handleEditEmployee(scope.row)">更新</el-button>
+                <el-button size="small" type="danger" @click="deleteEmployeeFn(scope.row.id)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+            layout="prev, pager, next, sizes, total"
+            :total="employeeTotal"
+            :page-size="employeePageSize"
+            :current-page="employeePage"
+            @current-change="onEmployeePageChange"
+            @size-change="onEmployeeSizeChange"
+            style="margin-top: 16px;"
+          />
         </el-card>
       </div>
       <!-- 门店管理 -->
@@ -67,12 +130,29 @@
       <!-- 用户管理 -->
       <div v-else-if="activeMenu === 'users'">
         <el-card>
-          <span>用户列表</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>用户列表</span>
+            <el-button type="primary" @click="fetchUsers">刷新</el-button>
+          </div>
           <el-table :data="userList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
             <el-table-column prop="name" label="用户名"/>
             <el-table-column prop="phone" label="电话"/>
+            <el-table-column label="操作" width="120">
+              <template #default="scope">
+                <el-button size="small" type="info" @click="handleViewUser(scope.row)">查看</el-button>
+              </template>
+            </el-table-column>
           </el-table>
+          <el-pagination
+            layout="prev, pager, next, sizes, total"
+            :total="userTotal"
+            :page-size="userPageSize"
+            :current-page="userPage"
+            @current-change="onUserPageChange"
+            @size-change="onUserSizeChange"
+            style="margin-top: 16px;"
+          />
         </el-card>
       </div>
       <!-- 优惠券管理 -->
@@ -85,7 +165,8 @@
             <el-table-column prop="discount" label="折扣"/>
             <el-table-column label="操作" width="120">
               <template #default="scope">
-                <el-button size="small" type="danger" @click="deleteCoupon(scope.row.id)">删除</el-button>
+                <el-button size="small" type="danger" @click="deleteCouponFn(scope.row.id)">删除</el-button>
+
               </template>
             </el-table-column>
           </el-table>
@@ -135,114 +216,410 @@
       </div>
     </el-main>
   </el-container>
+
+  <el-dialog v-model="orderDialogVisible" title="订单详情">
+    <el-descriptions :model="selectedOrder" border>
+      <el-descriptions-item label="订单ID">{{ selectedOrder.id }}</el-descriptions-item>
+      <el-descriptions-item label="状态">{{ selectedOrder.status }}</el-descriptions-item>
+      <el-descriptions-item label="总价">￥{{ selectedOrder.total }}</el-descriptions-item>
+      <el-descriptions-item label="下单时间">{{ selectedOrder.orderTime }}</el-descriptions-item>
+      <!-- 其他字段可自行补充 -->
+    </el-descriptions>
+  </el-dialog>
+
+  <!-- 用户查看弹窗 -->
+  <el-dialog v-model="userDialogVisible" title="用户详情" width="400px">
+    <div v-if="selectedUser">
+      <p><b>ID:</b> {{ selectedUser.id }}</p>
+      <p><b>用户名:</b> {{ selectedUser.name }}</p>
+      <p><b>电话:</b> {{ selectedUser.phone }}</p>
+      <p><b>Email:</b> {{ selectedUser.email }}</p>
+      <p><b>注册时间:</b> {{ selectedUser.createTime }}</p>
+    </div>
+    <template #footer>
+      <el-button @click="userDialogVisible = false">关闭</el-button>
+    </template>
+  </el-dialog>
+
+  <!-- 员工查看/编辑弹窗 -->
+  <el-dialog v-model="employeeDialogVisible" :title="employeeDialogMode === 'view' ? '查看员工' : '更新员工'" width="400px">
+    <el-form v-if="employeeDialogMode === 'edit'" :model="employeeForm" label-width="80px">
+      <el-form-item label="用户名">
+        <el-input v-model="employeeForm.username" />
+      </el-form-item>
+      <el-form-item label="密码">
+        <el-input v-model="employeeForm.password" type="password" show-password />
+      </el-form-item>
+      <el-form-item label="姓名">
+        <el-input v-model="employeeForm.name" />
+      </el-form-item>
+      <el-form-item label="电话">
+        <el-input v-model="employeeForm.phone" />
+      </el-form-item>
+    </el-form>
+    <div v-else>
+      <p><b>ID:</b> {{ employeeForm.id }}</p>
+      <p><b>用户名:</b> {{ employeeForm.username }}</p>
+      <p><b>电话:</b> {{ employeeForm.phone }}</p>
+      <p><b>创建时间:</b> {{ employeeForm.createTime }}</p>
+      <p><b>更新时间:</b> {{ employeeForm.updateTime }}</p>
+    </div>
+    <template #footer>
+      <el-button v-if="employeeDialogMode === 'view'" @click="employeeDialogMode = 'edit'">修改</el-button>
+      <el-button v-if="employeeDialogMode === 'edit'" type="primary" @click="submitEmployeeUpdate">确认</el-button>
+      <el-button @click="employeeDialogVisible = false">取消</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import request from '../utils/request'
+import type {
+  Coupon,
+  Customer,
+  Employee,
+  EmployeeSaveDTO,
+  EmployeeUpdateDTO,
+  Order,
+  Product,
+  Promotion,
+  Store
+} from '../api/types'
+import { logoutApi } from '../api/auth'
+import router from '../router'
+import {
+  getOrderById,
+  updateOrderStatus,
+  getEmployees as getMerchantEmployees,
+  getStores,
+  getAllCustomers,
+  getCoupons,
+  getPromotions,
+  getSales,
+  getSalesTotal,
+  getTraffic,
+  deleteEmployee,
+  deleteCoupon,
+  deletePromotion,
+  getOrderPage,
+  rejectOrder,
+  updateEmployee,
+  saveEmployee,
+  getEmployeePage,
+  getEmployeeById,
+  getCustomersPage
+} from '../api/merchant'
 
 const activeMenu = ref('orders')
-const orderId = ref('')
-const order = ref(null)
-const orderStatus = ref('')
+const orderId = ref(0)
+const order = ref<Order>({})
+const orderStatus = ref(0)
+const orderPayStatus = ref('')
 const orderStatusMap = {
-  0: '待支付',
-  1: '已支付',
-  2: '已发货',
-  3: '已完成',
-  4: '已取消'
+  0: 'pending',
+  1: 'unconfirmed',
+  2: 'confirmed',
+  3: 'delivering',
+  4: 'completed',
+  5: 'cancelled'
+}
+const orderPayStatusMap = {
+  0: 'unpaid',
+  1: 'paid',
+  2: 'refunded'
 }
 
-const staffList = ref([])
-const storeList = ref([])
-const userList = ref([])
-const couponList = ref([])
-const promotionList = ref([])
-const salesList = ref([])
+const orderList = ref<Order[]>([])
+const orderPage = ref(1)
+const orderPageSize = ref(10)
+const orderTotal = ref(0)
+const orderDialogVisible = ref(false)
+const selectedOrder = ref<Order>({})
+const rejectReason = ref('')
+const confirmAction = ref<0|1|2|3|4|5|null>(null)
+const staffList = ref<Employee[]>([])
+const storeList = ref<Store[]>([])
+const userList = ref<Customer[]>([])
+const couponList = ref<Coupon[]>([])
+const promotionList = ref<Promotion[]>([])
+const salesList = ref<Product[]>([])
 const salesTotal = ref(0)
 const traffic = ref(0)
+const currentEmployee = ref<Partial<Employee>>({})
+const isOrderSearchMode = ref(false)
+
+// 员工管理相关
+const employeeDialogVisible = ref(false)
+const employeeDialogMode = ref<'view' | 'edit'>('view')
+const employeeForm = ref<Partial<Employee>>({})
+const employeePage = ref(1)
+const employeePageSize = ref(10)
+const employeeTotal = ref(0)
+
+// 用户管理相关
+const userDialogVisible = ref(false)
+const selectedUser = ref<Customer>({})
+const userPage = ref(1)
+const userPageSize = ref(10)
+const userTotal = ref(0)
 
 const fetchOrderById = async () => {
   if (!orderId.value) return;
+
   try {
-    const res = await request.get(`/merchants/${orderId.value}`);
-    if (res.data.code === 200) { // 假设200表示成功
-      order.value = res.data.data;
+    const res = await getOrderById(Number(orderId.value));
+    if(res.data.data) {
+      orderList.value = [res.data.data];
+      isOrderSearchMode.value = true
     } else {
-      // 处理错误情况，例如显示错误消息
-      ElMessage.error(res.data.message);
-      order.value = null;
-      orderStatus.value = '';
+      ElMessage.error('未找到该订单')
+      orderList.value = []
     }
   } catch (error) {
-    // 处理请求错误，例如显示错误消息
-    ElMessage.error('请求失败，请稍后再试');
-    order.value = null;
-    orderStatus.value = '';
+    ElMessage.error('获取订单失败')
+    orderList.value = []
   }
 };
 
-const updateOrderStatus = async (id: number) => {
-  await request.put(`/merchants/orders/${id}/status`, null, { params: { status: orderStatus.value } })
-  ElMessage.success('订单状态已更新')
-  fetchOrderById()
+const fetchOrder = async () => {
+  await fetchOrderPage(orderPage.value, orderPageSize.value)
 }
 
-const fetchStaff = async () => {
-  const res = await request.get('/merchants/staff')
-  staffList.value = res.data.data
+const fetchOrderPage = async (page: number, size: number) => {
+  const res = await getOrderPage(page, size)
+  orderList.value = res.data.records
+  orderTotal.value = res.data.total
+  orderPageSize.value = res.data.size
 }
-const deleteStaff = async (id: number) => {
-  await request.delete(`/merchants/staff/${id}`)
-  ElMessage.success('删除成功')
-  fetchStaff()
+
+const updateOrderStatusFn = async (id: number) => {
+	await updateOrderStatus(id, Number(orderStatus.value))
+	ElMessage.success('订单状态已更新')
+	fetchOrderById()
+}
+
+const onOrderPageChange = async (page: number) => {
+  orderPage.value = page
+  await fetchOrderPage(page, orderPageSize.value)
+}
+
+const onOrderSizeChange = async (size: number) => {
+  orderPageSize.value = size
+  await fetchOrderPage(orderPage.value, size)
+}
+
+const exitOrderSearch = () => {
+  isOrderSearchMode.value = false;
+  orderId.value = 0;
+  orderPage.value = 1;
+  orderPageSize.value = 10;
+  fetchOrderPage(orderPage.value, orderPageSize.value); // 重新加载默认分页
+}
+
+const handleOrderAction = async (row:Order) => {
+  const status = row.status
+  if(status === 'pending') {
+    await showConfirmDialog(row, '是否确认接单？', 'accept')
+  } else if(status === 'confirmed') {
+    await confirmStartDelivery(row)
+  } else if(status === 'delivering') {
+    await confirmCompleteOrder(row)
+  }
+}
+
+const acceptOrder = async (orderId: number) => {
+  await updateOrderStatus(orderId, 2)
+}
+
+const showConfirmDialog = async (order: Order, message: string, actionType: 'accept' | 'reject') => {
+  try {
+    await ElMessageBox.confirm(message, '提示', { type: 'warning' });
+    if (actionType === 'accept') {
+      await acceptOrder(order.id!);
+    } else {
+      const reason = prompt('请输入拒单原因：');
+      if (!reason) {
+        ElMessage.warning('拒单原因不能为空');
+        return;
+      }
+      await rejectOrder({
+        orderId: order.id,
+        reason
+      });
+    }
+  } catch (error) {
+    // 用户取消或发生错误
+  }
+};
+
+async function startDelivery(number: number) {
+  await updateOrderStatus(number, 3)
+}
+
+const confirmStartDelivery = async (order: Order) => {
+  try {
+    await ElMessageBox.confirm('是否开始派送？', '提示', { type: 'info' });
+    await startDelivery(order.id!);
+    ElMessage.success('已开始派送');
+    await fetchOrderPage(orderPage.value, orderPageSize.value);
+  } catch (error) {
+    // 用户取消或发生错误
+  }
+};
+
+async function completeOrder(number: number) {
+  await updateOrderStatus(number, 4)
+}
+
+const confirmCompleteOrder = async (order: Order) => {
+  try {
+    await ElMessageBox.confirm('是否完成订单？', '提示', { type: 'success' });
+    await completeOrder(order.id!);
+    ElMessage.success('订单已完成');
+    fetchOrderPage(orderPage.value, orderPageSize.value);
+  } catch (error) {
+    // 用户取消或发生错误
+  }
+};
+
+const handleViewOrder = (order: Order) => {
+  selectedOrder.value = order;
+  orderDialogVisible.value = true;
+};
+
+const fetchStaff = async (page = employeePage.value, size = employeePageSize.value) => {
+  const res = await getEmployeePage({ pageNum: page, pageSize: size })
+  staffList.value = res.data.records
+  employeeTotal.value = res.data.total
+  employeePageSize.value = res.data.size
+}
+const deleteEmployeeFn = async (id: number) => {
+	await deleteEmployee(id)
+	ElMessage.success('删除成功')
+	fetchStaff()
+}
+
+const onEmployeePageChange = (page: number) => {
+  employeePage.value = page
+  fetchStaff(page, employeePageSize.value)
+}
+const onEmployeeSizeChange = (size: number) => {
+  employeePageSize.value = size
+  employeePage.value = 1
+  fetchStaff(1, size)
+}
+
+// 查看员工信息
+const handleViewEmployee = async (row: Employee) => {
+  const res = await getEmployeeById(row.id!)
+  employeeForm.value = { ...res.data.data }
+  employeeDialogMode.value = 'view'
+  employeeDialogVisible.value = true
+}
+
+// 编辑员工信息
+const handleEditEmployee = (row: Employee) => {
+  employeeForm.value = { ...row }
+  employeeDialogMode.value = 'edit'
+  employeeDialogVisible.value = true
+}
+
+// 添加员工
+const handleAddEmployee = () => {
+  employeeForm.value = {}
+  employeeDialogMode.value = 'edit'
+  employeeDialogVisible.value = true
+}
+
+// 提交员工修改
+const submitEmployeeUpdate = async () => {
+  try {
+    if (employeeForm.value.id) {
+      await updateEmployee(employeeForm.value.id, employeeForm.value as EmployeeUpdateDTO)
+    } else {
+      await saveEmployee(employeeForm.value as EmployeeSaveDTO)
+    }
+    ElMessage.success(employeeForm.value.id ? '更新成功' : '添加成功')
+    employeeDialogVisible.value = false
+    fetchStaff()
+  } catch (e) {
+    ElMessage.error(employeeForm.value.id ? '更新失败' : '添加失败')
+  }
+}
+
+// 查看用户信息
+const handleViewUser = (row: Customer) => {
+  selectedUser.value = row
+  userDialogVisible.value = true
 }
 
 const fetchStores = async () => {
-  const res = await request.get('/merchants/stores')
-  storeList.value = res.data.data
+  	const res = await getStores()
+  	storeList.value = res.data.data
 }
 
-const fetchUsers = async () => {
-  const res = await request.get('/merchants/users')
-  userList.value = res.data.data
+const fetchUsers = async (page = userPage.value, size = userPageSize.value) => {
+  const res = await getCustomersPage(page, size)
+  userList.value = res.data.records
+  userTotal.value = res.data.total
+  userPageSize.value = res.data.size
+}
+
+const onUserPageChange = (page: number) => {
+  userPage.value = page
+  fetchUsers(page, userPageSize.value)
+}
+const onUserSizeChange = (size: number) => {
+  userPageSize.value = size
+  userPage.value = 1
+  fetchUsers(1, size)
 }
 
 const fetchCoupons = async () => {
-  const res = await request.get('/merchants/coupons')
-  couponList.value = res.data.data
+	const res = await getCoupons()
+	couponList.value = res.data.data
 }
-const deleteCoupon = async (id: number) => {
-  await request.delete(`/merchants/coupons/${id}`)
-  ElMessage.success('删除成功')
-  fetchCoupons()
+
+const deleteCouponFn = async (id: number) => {
+	await deleteCoupon(id)
+	ElMessage.success('删除成功')
+	fetchCoupons()
 }
 
 const fetchPromotions = async () => {
-  const res = await request.get('/merchants/promotions')
-  promotionList.value = res.data.data
+	const res = await getPromotions()
+	promotionList.value = res.data.data
 }
-const deletePromotion = async (id: number) => {
-  await request.delete(`/merchants/promotions/${id}`)
-  ElMessage.success('删除成功')
-  fetchPromotions()
+const deletePromotionFn = async (id: number) => {
+	await deletePromotion(id)
+	ElMessage.success('删除成功')
+	fetchPromotions()
 }
 
 const fetchStats = async () => {
   const [salesRes, totalRes, trafficRes] = await Promise.all([
-    request.get('/merchants/sales'),
-    request.get('/merchants/sales/total'),
-    request.get('/merchants/traffic')
+    getSales(),
+    getSalesTotal(),
+    getTraffic()
   ])
   salesList.value = salesRes.data.data
   salesTotal.value = totalRes.data.data
   traffic.value = trafficRes.data.data
 }
 
+const handleUpdateOrderStatus = async (id: number) => {
+	await updateOrderStatus(id, Number(orderStatus.value))
+	ElMessage.success('订单状态已更新')
+	fetchOrderById()
+}
+
 const handleMenuSelect = (key: string) => {
   activeMenu.value = key
-  if (key === 'orders') return
+  if (key === 'orders') {
+    isOrderSearchMode.value = false
+    fetchOrderPage(orderPage.value, orderPageSize.value)
+  }
   if (key === 'staff') fetchStaff()
   if (key === 'stores') fetchStores()
   if (key === 'users') fetchUsers()
@@ -251,9 +628,29 @@ const handleMenuSelect = (key: string) => {
   if (key === 'stat') fetchStats()
 }
 
+const logout = () => {
+  ElMessageBox.confirm('确定退出登录吗？', '提示', { type: 'warning' })
+    .then(async () => {
+      await logoutApi()
+      ElMessage.success('退出成功')
+      localStorage.removeItem('token')
+      localStorage.removeItem('uuid')
+      localStorage.removeItem('username')
+      localStorage.removeItem('userType')
+      await router.push('/index')
+    })
+}
+
 onMounted(() => {
+  currentEmployee.value = JSON.parse(localStorage.getItem('currentEmployee') || '{}')
   // 默认加载员工列表
   fetchStaff()
+  fetchUsers()
+  fetchStores()
+  fetchCoupons()
+  fetchPromotions()
+  fetchStats()
+  fetchOrderPage(orderPage.value, orderPageSize.value)
 })
 </script>
 
@@ -265,5 +662,18 @@ onMounted(() => {
 }
 .el-main {
   background: #f9f9f9;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.sub-header {
+  background-color: #f5f7fa;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom: 1px solid #ebeef5;
 }
 </style>

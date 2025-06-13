@@ -1,8 +1,6 @@
 package com.mo.api.service;
 
-import com.mo.api.dto.OrderCancelDTO;
-import com.mo.api.dto.OrderConfirmDTO;
-import com.mo.api.dto.OrderRejectionDTO;
+import com.mo.api.dto.*;
 import com.mo.api.vo.OrderSubmitVO;
 import com.mo.entity.AfterSale;
 import com.mo.entity.Order;
@@ -52,4 +50,10 @@ public interface OrderService {
     void rejection(OrderRejectionDTO ordersRejectionDTO);
 
     void cancel(OrderCancelDTO ordersCancelDTO);
+
+    int getOrderCount();
+
+    void complete(OrderCompleteDTO orderCompleteDTO);
+
+    void deliver(OrderDeliverDTO orderDeliverDTO);
 }

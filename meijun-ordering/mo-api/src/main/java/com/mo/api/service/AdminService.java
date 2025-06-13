@@ -22,4 +22,6 @@ public interface AdminService {
     int getTraffic();
 
     BigDecimal getSalesTotal();
+
+    int getAdminCount();
 }

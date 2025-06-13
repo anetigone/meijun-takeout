@@ -1,8 +1,6 @@
 package com.mo.service.impl;
 
-import com.mo.api.dto.OrderCancelDTO;
-import com.mo.api.dto.OrderConfirmDTO;
-import com.mo.api.dto.OrderRejectionDTO;
+import com.mo.api.dto.*;
 import com.mo.api.service.OrderService;
 import com.mo.api.vo.OrderSubmitVO;
 import com.mo.common.constant.MessageConstant;
@@ -205,6 +203,7 @@ public class OrderServiceImpl implements OrderService {
     public void confirm(OrderConfirmDTO orderConfirmDTO) {
         Order order = new Order();
         BeanUtils.copyProperties(orderConfirmDTO, order);
+        order.setStatus(OrderStatus.confirmed);
 
         orderMapper.updateOrder(order);
     }
@@ -213,6 +212,8 @@ public class OrderServiceImpl implements OrderService {
     public void rejection(OrderRejectionDTO ordersRejectionDTO) {
         Order order = new Order();
         BeanUtils.copyProperties(ordersRejectionDTO, order);
+        order.setStatus(OrderStatus.cancelled);
+        order.setRejectionReason(ordersRejectionDTO.getReason());
 
         orderMapper.updateOrder(order);
     }
@@ -221,7 +222,31 @@ public class OrderServiceImpl implements OrderService {
     public void cancel(OrderCancelDTO ordersCancelDTO) {
         Order order = new Order();
         BeanUtils.copyProperties(ordersCancelDTO, order);
+        order.setStatus(OrderStatus.cancelled);
 
         orderMapper.updateOrder(order);
+    }
+
+    @Override
+    public void complete(OrderCompleteDTO orderCompleteDTO) {
+        Order order = new Order();
+        BeanUtils.copyProperties(orderCompleteDTO, order);
+        order.setStatus(OrderStatus.completed);
+
+        orderMapper.updateOrder(order);
+    }
+
+    @Override
+    public void deliver(OrderDeliverDTO orderDeliverDTO) {
+        Order order = new Order();
+        BeanUtils.copyProperties(orderDeliverDTO, order);
+        order.setStatus(OrderStatus.delivering);
+
+        orderMapper.updateOrder(order);
+    }
+
+    @Override
+    public int getOrderCount() {
+        return  orderMapper.getOrderCount();
     }
 }

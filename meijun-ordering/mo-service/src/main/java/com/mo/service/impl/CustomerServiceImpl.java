@@ -25,4 +25,14 @@ public class CustomerServiceImpl implements CustomerService {
     public List<Customer> searchForCustomer(String name){
         return customerMapper.searchForCustomer(name);
     }
+
+    @Override
+    public List<Customer> getCustomerPage(int offset, int size) {
+        return customerMapper.getCustomerPage(offset, size);
+    }
+
+    @Override
+    public int getCustomerCount() {
+        return customerMapper.getCustomerCount();
+    }
 }

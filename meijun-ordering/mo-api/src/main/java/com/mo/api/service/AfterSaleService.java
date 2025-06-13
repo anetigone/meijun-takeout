@@ -15,4 +15,8 @@ public interface AfterSaleService {
     AfterSale getAfterSaleById(Long id);
 
     List<AfterSale> getAfterSales();
+
+    List<AfterSale> getAfterSalePage(int offset, int size);
+
+    int getAfterSaleCount();
 }

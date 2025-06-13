@@ -213,7 +213,6 @@ public class AuthController {
         base64 = "data:image/jpeg;base64," + base64;
 
         String uuid = UUID.randomUUID().toString();
-        log.info("uuid: {}", uuid);
         redisService.hSet(RedisKeyConstant.KAPTCHA, uuid, text, CaptchaConstant.CAPTCHA_EXPIRE_TIME);
 
         KaptchaVO kaptchaVO = KaptchaVO.builder()

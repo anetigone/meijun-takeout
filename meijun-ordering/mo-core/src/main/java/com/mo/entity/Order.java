@@ -43,6 +43,8 @@ public class Order implements Serializable {
     private String orderNumber;
     @Schema(description = "备注")
     private String remark;
+    @Schema(description = "拒单原因")
+    private String rejectionReason;
     // 地址、配送方式等其他字段
 
     LocalDateTime createTime;

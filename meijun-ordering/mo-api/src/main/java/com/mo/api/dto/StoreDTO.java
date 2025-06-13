@@ -10,7 +10,7 @@ public class StoreDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "门店id")
+    @Schema(description = "店长id")
     private Long merchantId;
     @Schema(description = "门店名称")
     private String name;

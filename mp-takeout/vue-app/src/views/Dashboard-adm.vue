@@ -431,6 +431,8 @@ const logout = () => {
       ElMessage.success('退出成功')
       localStorage.removeItem('token')
       localStorage.removeItem('uuid')
+      localStorage.removeItem('username')
+      localStorage.removeItem('userType')
       await router.push('/index')
     })
 }

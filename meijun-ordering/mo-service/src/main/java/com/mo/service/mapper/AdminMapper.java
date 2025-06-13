@@ -20,4 +20,6 @@ public interface AdminMapper {
     void deleteAdmin(Long id);
 
     void saveAdmin(Admin admin);
+
+    int getAdminCount();
 }

@@ -63,6 +63,9 @@
             </if>
         </where>
     </select>
+    <select id="getOrderCount" resultType="java.lang.Integer">
+        select count(*) from orders
+    </select>
 
     <update id="updateOrder">
         update orders

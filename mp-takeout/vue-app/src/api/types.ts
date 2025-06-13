@@ -118,6 +118,7 @@ export interface OrderDetail {
 export interface Order {
   id?: number;
   status?: string;
+  payStatus?: string;
   total?: number;
   orderTime?: Date;
   orderNumber?: string;
@@ -202,4 +203,54 @@ export interface DistributeCouponDTO {
   userId?: number;
   couponId?: number;
   customerIds?: number[];
+}
+
+export interface PromotionDTO {
+  userId?: number;
+  name?: string;
+  description?: string;
+  imgUrl?: string;
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export interface StoreDTO {
+  merchantId?: number;
+  name?: string;
+  address?: string;
+}
+
+export interface OrderCancelDTO {
+  id?: number;
+  userId?: number;
+  orderId?: number;
+  reason?: string;
+}
+
+export interface OrderConfirmDTO {
+  id?: number;
+  status?: string;
+  storeId?: number;
+  address?: string;
+  contact?: string;
+  contactPhone?: string;
+  remark?: string;
+}
+
+export interface OrderRejectionDTO {
+  id?: number;
+  userId?: number;
+  orderId?: number;
+  reason?: string;
+}
+
+export interface OrderRefundDTO {
+  userId?: number;
+  orderId?: number;
+  reason?: string;
+}
+
+export interface PromotionVO {
+  promotionId?: number
+  status?: string
 }

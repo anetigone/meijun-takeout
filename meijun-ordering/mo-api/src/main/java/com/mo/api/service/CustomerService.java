@@ -8,4 +8,8 @@ public interface CustomerService {
     List<Customer> getAll();
 
     List<Customer> searchForCustomer(String name);
+
+    List<Customer> getCustomerPage(int offset, int size);
+
+    int getCustomerCount();
 }

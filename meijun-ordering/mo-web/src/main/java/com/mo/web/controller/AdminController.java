@@ -61,8 +61,9 @@ public class AdminController {
         int size = dto.getPageSize();
         int offset = (num - 1) * size;
         List<Admin> list = adminService.getPage(offset, size);
+        int total = adminService.getAdminCount();
 
-        return PageResult.success(list.size(), list, num, size);
+        return PageResult.success(total, list, num, size);
     }
 
     @Operation(summary = "更新管理员")
@@ -156,8 +157,9 @@ public class AdminController {
         int size = dto.getPageSize();
         int offset = (num - 1) * size;
         List<Employee> list = employeeService.getEmployeePage(offset, size);
+        int total = employeeService.getEmployeeCount();
 
-        return PageResult.success(list.size(), list, num, size);
+        return PageResult.success(total, list, num, size);
     }
 
     @Operation (summary = "添加员工")

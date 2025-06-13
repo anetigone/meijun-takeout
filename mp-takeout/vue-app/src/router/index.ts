@@ -27,7 +27,7 @@ const routes = [
     component: DashboardAdm,
     meta: 
     { 
-      requiresAuth: false, 
+      requiresAuth: true, 
       title: '管理员面板' 
     }
   },

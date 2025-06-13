@@ -22,4 +22,6 @@ public interface EmployeeMapper {
     void updateEmployee(@Param("employee") Employee employee);
 
     void deleteEmployee(@Param("id") Long id);
+    
+    int getEmployeeCount();
 }

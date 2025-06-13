@@ -34,4 +34,6 @@ public interface OrderMapper {
     Double sumByMap(@Param("map") Map<String, Object> map);
 
     List<Order> getByStatusAndOrderTimeBefore(OrderStatus status, LocalDateTime begin);
+
+    int getOrderCount();
 }

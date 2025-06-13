@@ -13,7 +13,12 @@ public interface AfterSaleMapper {
     AfterSale getAfterSaleById(Long id);
 
     int updateAfterSale(AfterSale afterSale);
+
     int deleteAfterSale(Long id);
 
     List<AfterSale> getAfterSales();
+
+    List<AfterSale> getAfterSalePage(int offset, int size);
+
+    int getAfterSaleCount();
 }

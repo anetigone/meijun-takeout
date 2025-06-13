@@ -45,4 +45,11 @@
     <select id="getAfterSales" resultType="com.mo.entity.AfterSale">
         select * from after_sales where status = 'pending'
     </select>
+    <select id="getAfterSalePage" resultType="com.mo.entity.AfterSale">
+        select * from after_sales
+        limit #{offset}, #{limit}
+    </select>
+    <select id="getAfterSaleCount" resultType="java.lang.Integer">
+        select count(*) from after_sales
+    </select>
 </mapper>

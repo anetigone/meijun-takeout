@@ -37,4 +37,14 @@ public class AfterSaleServiceImpl implements AfterSaleService {
     public List<AfterSale> getAfterSales() {
         return afterSaleMapper.getAfterSales();
     }
+
+    @Override
+    public List<AfterSale> getAfterSalePage(int offset, int size){
+        return afterSaleMapper.getAfterSalePage(offset, size);
+    }
+
+    @Override
+    public int getAfterSaleCount(){
+        return afterSaleMapper.getAfterSaleCount();
+    }
 }

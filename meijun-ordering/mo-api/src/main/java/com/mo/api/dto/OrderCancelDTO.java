@@ -16,6 +16,6 @@ public class OrderCancelDTO implements Serializable {
     private Long id;
     //订单取消原因
     @Schema(description = "订单取消原因")
-    private String cancelReason;
+    private String reason;
 
 }

@@ -46,4 +46,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteEmployee(Long id){
         employeeMapper.deleteEmployee(id);
     }
+
+    @Override
+    public int getEmployeeCount() {
+        return employeeMapper.getEmployeeCount();
+    }
 }

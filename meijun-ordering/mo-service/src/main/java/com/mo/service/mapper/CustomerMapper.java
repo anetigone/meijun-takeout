@@ -27,4 +27,8 @@ public interface CustomerMapper {
     List<Customer> searchForCustomer(String name);
 
     Integer countByMap(@Param("map") Map<String, Object> map);
+
+    List<Customer> getCustomerPage(int offset, int size);
+
+    int getCustomerCount();
 }

@@ -69,5 +69,8 @@ public class AdminServiceImpl implements AdminService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-
+    @Override
+    public int getAdminCount() {
+        return adminMapper.getAdminCount();
+    }
 }

@@ -18,6 +18,9 @@
         select * from employees where status = 1
         limit #{offset},#{size}
     </select>
+    <select id="getEmployeeCount" resultType="java.lang.Integer">
+        select count(*) from employees
+    </select>
 
     <insert id="saveEmployee"
             parameterType="com.mo.entity.Employee"
