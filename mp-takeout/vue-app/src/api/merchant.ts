@@ -1,6 +1,30 @@
 import request from '../utils/request';
 import type { ApiResponse, PageResult } from './api-response';
-import type { Employee, EmployeePageQueryDTO, EmployeeSaveDTO, EmployeeUpdateDTO, Order, OrderConfirmDTO, OrderCancelDTO, OrderRejectionDTO, Store, StoreDTO, Customer, AfterSale, ApproveDTO, Coupon, CouponDTO, DistributeCouponDTO, Promotion, PromotionDTO, Product, WorkspaceDataVO, OrderOverviewVO, PromotionVO } from './types';
+import type {
+ Employee,
+ EmployeePageQueryDTO,
+ EmployeeSaveDTO,
+ EmployeeUpdateDTO,
+ Order,
+ OrderConfirmDTO,
+ OrderCancelDTO,
+ OrderRejectionDTO,
+ Store,
+ StoreDTO,
+ Customer,
+ AfterSale,
+ ApproveDTO,
+ Coupon,
+ CouponDTO,
+ DistributeCouponDTO,
+ Promotion,
+ PromotionDTO,
+ Product,
+ WorkspaceDataVO,
+ OrderOverviewVO,
+ PromotionVO,
+ OrderPageQueryDTO
+} from './types';
 
 
 // 获取商户订单列表
@@ -12,8 +36,8 @@ export const updateOrderStatus = (orderId: number, status: number) =>
     request.put<ApiResponse<Order>>(`/merchants/orders/${orderId}/status`, { status });
 
 // 获取订单分页列表
-export const getOrderPage = (pageNum: number, pageSize: number) =>
-    request.get<PageResult<Order>>('/merchants/orders/page', { params: { pageNum, pageSize } });
+export const getOrderPage = (orderPageQueryDTO: OrderPageQueryDTO) =>
+    request.get<PageResult<Order>>('/merchants/orders/page', {params: orderPageQueryDTO});
 
 // 接单
 export const confirmOrder = (orderConfirmDTO: OrderConfirmDTO) =>
@@ -35,8 +59,8 @@ export const confirmOrder = (orderConfirmDTO: OrderConfirmDTO) =>
   request.get<ApiResponse<Employee>>(`/merchants/staff/${id}`);
 
 // 获取员工分页
- export const getEmployeePage = (employeePageQueryDTO: EmployeePageQueryDTO) => 
-  request.get<PageResult<Employee>>('/merchants/staff/page', { params: employeePageQueryDTO });
+ export const getEmployeePage = (page:  number, size: number) =>
+  request.get<PageResult<Employee>>('/merchants/staff/page', { params: {page, size} });
 
 // 保存员工信息
  export const saveEmployee = (employeeDTO: EmployeeSaveDTO) => 
@@ -63,8 +87,8 @@ export const getAllCustomers = () =>
     request.get<ApiResponse<Customer[]>>('/merchants/users');
 
 // 获取用户分页
-export const getCustomersPage = (page: number, pageSize: number) =>
-  request.get<PageResult<Customer>>('/merchants/users/page', { params: { page, pageSize } });
+export const getCustomersPage = (page: number, size: number) =>
+  request.get<PageResult<Customer>>('/merchants/users/page', { params: { page, size } });
 
 // 搜索用户
  export const searchCustomers = (name: string) => 

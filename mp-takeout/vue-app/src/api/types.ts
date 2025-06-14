@@ -244,6 +244,11 @@ export interface OrderRejectionDTO {
   reason?: string;
 }
 
+export interface OrderPageQueryDTO {
+  page: number;
+  size: number;
+}
+
 export interface OrderRefundDTO {
   userId?: number;
   orderId?: number;

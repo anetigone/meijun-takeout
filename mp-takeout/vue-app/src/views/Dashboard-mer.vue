@@ -141,7 +141,7 @@
           </div>
           <el-table :data="userList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="name" label="用户名" width="120"/>
+            <el-table-column prop="username" label="用户名" width="120"/>
             <el-table-column prop="phone" label="电话" width="240"/>
             <el-table-column label="操作" width="240">
               <template #default="scope">
@@ -204,7 +204,7 @@
           </el-col>
           <el-col :span="8">
             <el-card>
-              <div>今日流量</div>
+              <div>总流量</div>
               <div style="font-size: 2em; color: #67C23A;">{{ traffic }}</div>
             </el-card>
           </el-col>
@@ -248,7 +248,7 @@
   <el-dialog v-model="userDialogVisible" title="用户详情" width="400px">
     <div v-if="selectedUser">
       <p><b>ID:</b> {{ selectedUser.id }}</p>
-      <p><b>用户名:</b> {{ selectedUser.name }}</p>
+      <p><b>用户名:</b> {{ selectedUser.username }}</p>
       <p><b>电话:</b> {{ selectedUser.phone }}</p>
       <p><b>Email:</b> {{ selectedUser.email }}</p>
       <p><b>注册时间:</b> {{ selectedUser.createTime }}</p>
@@ -404,7 +404,7 @@ const fetchOrder = async () => {
 }
 
 const fetchOrderPage = async (page: number, size: number) => {
-  const res = await getOrderPage(page, size)
+  const res = await getOrderPage({page, size})
   orderList.value = res.data.records
   orderTotal.value = res.data.total
   orderPageSize.value = res.data.size
@@ -506,7 +506,7 @@ const handleViewOrder = (order: Order) => {
 };
 
 const fetchStaff = async (page = employeePage.value, size = employeePageSize.value) => {
-  const res = await getEmployeePage({ pageNum: page, pageSize: size })
+  const res = await getEmployeePage(page, size)
   staffList.value = res.data.records
   employeeTotal.value = res.data.total
   employeePageSize.value = res.data.size
@@ -697,7 +697,10 @@ const testFetchEmployee = () => {
 }
 
 onMounted(() => {
-  currentEmployee.value = JSON.parse(localStorage.getItem('currentEmployee') || '{}')
+  const storedUsername = localStorage.getItem('username');
+  if (storedUsername) {
+    currentEmployee.value.username = storedUsername;
+  }
   // 默认加载员工列表
   fetchStaff()
   //testFetchEmployee() // 测试数据

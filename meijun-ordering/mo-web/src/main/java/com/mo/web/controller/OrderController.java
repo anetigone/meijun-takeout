@@ -1,7 +1,6 @@
 package com.mo.web.controller;
 
 import com.mo.api.dto.AfterSaleDTO;
-import com.mo.api.dto.OrderPageQueryDTO;
 import com.mo.api.dto.OrderCommentDTO;
 import com.mo.api.dto.OrderSubmitDTO;
 import com.mo.api.service.OrderService;
@@ -45,19 +44,17 @@ public class OrderController {
 
     @Operation(summary = "获取订单分页")
     @Parameters({
-            @Parameter(name = "orderPageQueryDTO", schema = @Schema(implementation = OrderPageQueryDTO.class))
+            @Parameter(name = "page", description = "页码", required = true),
+            @Parameter(name = "size", description = "每页数据量", required = true)
     })
     @GetMapping("/page")
-    public PageResult getPage(@RequestBody OrderPageQueryDTO orderPageQueryDTO){
-        int pageNum = orderPageQueryDTO.getPage();
-        int pageSize = orderPageQueryDTO.getSize();
+    public PageResult getPage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
 
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
-
+        int offset = (page - 1) * size;
         List<Order> orders = orderService.getPage(offset, size);
+        int total = orderService.getOrderCount();
 
-        return PageResult.success(orders.size(), orders, pageNum, pageSize);
+        return PageResult.success(orders.size(), orders, page, size);
     }
 
     @Operation(summary = "获取订单详情")

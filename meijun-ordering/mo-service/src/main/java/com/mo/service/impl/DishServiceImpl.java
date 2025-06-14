@@ -58,4 +58,9 @@ public class DishServiceImpl implements DishService {
     public void saveDish(Dish dish) {
         dishMapper.saveDish(dish);
     }
+
+    @Override
+    public int getDishCount() {
+        return dishMapper.getDishCount();
+    }
 }

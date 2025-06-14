@@ -18,10 +18,11 @@
         select * from dishes where status = 1
                                and name like concat('%',#{name},'%')
     </select>
-
-
     <select id="getDishById" resultType="com.mo.entity.Dish">
         select * from dishes where id = #{id}
+    </select>
+    <select id="getDishCount" resultType="java.lang.Integer">
+        select count(*) from dishes
     </select>
     
     <insert id="saveDish"

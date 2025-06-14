@@ -54,16 +54,19 @@ public class AdminController {
     }
 
     @Operation(summary = "分页获取管理员")
+    @Parameters({
+            @Parameter(name = "page", description = "页码", required = true, schema = @Schema(implementation = Integer.class)),
+            @Parameter(name = "size", description = "每页数量", required = true, schema = @Schema(implementation = Integer.class))
+    })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Admin.class)))
     @GetMapping("/page")
-    public PageResult getPage(AdminPageQueryDTO dto){
-        int num = dto.getPageNum();
-        int size = dto.getPageSize();
-        int offset = (num - 1) * size;
+    public PageResult getPage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+
+        int offset = (page - 1) * size;
         List<Admin> list = adminService.getPage(offset, size);
         int total = adminService.getAdminCount();
 
-        return PageResult.success(total, list, num, size);
+        return PageResult.success(total, list, page, size);
     }
 
     @Operation(summary = "更新管理员")
@@ -148,18 +151,17 @@ public class AdminController {
 
     @Operation (summary = "分页获取员工")
     @Parameters ({
-            @Parameter(name = "employeePageQueryDTO", description = "员工分页参数", required = true, schema = @Schema(implementation = EmployeePageQueryDTO.class))
+           @Parameter(name = "page", description = "页码", required = true, schema = @Schema(implementation = Integer.class)),
+            @Parameter(name = "size", description = "每页数量", required = true, schema = @Schema(implementation = Integer.class))
     })
     @ApiResponse (responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Employee.class)))
     @GetMapping("/employee/page")
-    public PageResult getEmployeePage(EmployeePageQueryDTO dto){
-        int num = dto.getPageNum();
-        int size = dto.getPageSize();
-        int offset = (num - 1) * size;
+    public PageResult getEmployeePage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
+        int offset = (page - 1) * size;
         List<Employee> list = employeeService.getEmployeePage(offset, size);
         int total = employeeService.getEmployeeCount();
 
-        return PageResult.success(total, list, num, size);
+        return PageResult.success(total, list, page, size);
     }
 
     @Operation (summary = "添加员工")

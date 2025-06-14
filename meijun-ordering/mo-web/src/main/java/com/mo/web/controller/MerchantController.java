@@ -73,12 +73,9 @@ public class MerchantController {
     }
 
     @GetMapping("/orders/page")
-    public PageResult getOrderPage(@RequestBody OrderPageQueryDTO orderPageQueryDTO){
-        int pageNum = orderPageQueryDTO.getPage();
-        int pageSize = orderPageQueryDTO.getSize();
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
+    public PageResult getOrderPage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
 
+        int offset = (page - 1) * size;
         List<Order> list = orderService.getPage(offset, size);
         int total = orderService.getOrderCount();
 
@@ -163,20 +160,18 @@ public class MerchantController {
 
     @Operation(summary = "获取员工分页")
     @Parameters({
-            @Parameter(name = "employeePageQueryDTO", schema = @Schema(implementation = EmployeePageQueryDTO.class))
+            @Parameter(name = "page", description = "页码", required = true),
+            @Parameter(name = "size", description = "每页显示记录数", required = true)
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Employee.class)))
     @GetMapping("/staff/page")
-    public PageResult getEmployeePage(@RequestBody EmployeePageQueryDTO employeePageQueryDTO){
-        int pageNum = employeePageQueryDTO.getPageNum();
-        int pageSize = employeePageQueryDTO.getPageSize();
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
+    public PageResult getEmployeePage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size){
 
+        int offset = (page - 1) * size;
         List<Employee> list = employeeService.getEmployeePage(offset, size);
         int total = employeeService.getEmployeeCount();
 
-        return PageResult.success(total, list, pageNum, pageSize);
+        return PageResult.success(total, list, page, size);
     }
 
     @Operation(summary = "保存员工信息")
@@ -258,16 +253,13 @@ public class MerchantController {
     }
 
     @GetMapping("/users/page")
-    public PageResult getCustomerPage(@RequestBody CustomerPageQueryDTO customerPageQueryDTO) {
-        int pageNum = customerPageQueryDTO.getPageNum();
-        int pageSize = customerPageQueryDTO.getPageSize();
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
+    public PageResult getCustomerPage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
 
+        int offset = (page - 1) * size;
         List<Customer> list = customerService.getCustomerPage(offset, size);
         int total = customerService.getCustomerCount();
 
-        return PageResult.success(total, list, pageNum, pageSize);
+        return PageResult.success(total, list, page, size);
     }
 
     @Operation(summary = "搜索用户")
@@ -289,16 +281,20 @@ public class MerchantController {
         return Result.success(afterSaleService.getAfterSales());
     }
 
-    public PageResult  getAfterSalePage(@RequestBody AfterSalePageQueryDTO afterSalePageQueryDTO) {
-        int pageNum = afterSalePageQueryDTO.getPageNum();
-        int pageSize = afterSalePageQueryDTO.getPageSize();
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
+    @Operation(summary = "获取售后分页列表")
+    @Parameters({
+            @Parameter(name = "page", description = "页码", required = true),
+            @Parameter(name = "size", description = "每页数量", required = true)
+    })
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = AfterSale.class)))
+    @GetMapping("/after-sale/page")
+    public PageResult  getAfterSalePage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
 
+        int offset = (page - 1) * size;
         List<AfterSale> list = afterSaleService.getAfterSalePage(offset, size);
         int total = afterSaleService.getAfterSaleCount();
 
-        return PageResult.success(total, list, pageNum, pageSize);
+        return PageResult.success(total, list, page, size);
       }
 
     @Operation(summary = "审批售后")

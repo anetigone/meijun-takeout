@@ -20,4 +20,6 @@ public interface DishMapper {
     void saveDish(@Param("dish") Dish dish);
 
     void updateDish(@Param("dish") Dish dish);
+
+    int getDishCount();
 }

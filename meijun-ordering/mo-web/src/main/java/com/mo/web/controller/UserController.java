@@ -1,6 +1,5 @@
 package com.mo.web.controller;
 
-import com.mo.api.dto.OrderPageQueryDTO;
 import com.mo.api.dto.UserInfoDTO;
 import com.mo.api.service.OrderService;
 import com.mo.api.service.RedisService;
@@ -96,18 +95,19 @@ public class UserController {
 
     @Operation(summary = "获取用户订单分页")
     @Parameters({
-            @Parameter(name = "orderPageQueryDTO", description = "分页参数", required = true, schema = @Schema(implementation = OrderPageQueryDTO.class))
+            @Parameter(name = "page", description = "页码", required = true),
+            @Parameter(name = "size", description = "每页数据量", required = true),
+            @Parameter(name = "id", description = "用户ID", required = true)
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Order.class)))
     @GetMapping("/orders/page")
-    public PageResult getPage(OrderPageQueryDTO dto) {
-        int num = dto.getPage();
-        int size = dto.getSize();
-        int offset = (num - 1) * size;
+    public PageResult getPage(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size, @RequestParam long id) {
 
-        List<Order> orders = orderService.getPage(offset, size, dto.getId());
+        int offset = (page - 1) * size;
+        List<Order> orders = orderService.getPage(offset, size, id);
+        int total = orderService.getOrderCount();
 
-        return PageResult.success(orders.size(), orders, num, size);
+        return PageResult.success(total, orders, page, size);
     }
 
     @Operation(summary = "获取用户订单详情")

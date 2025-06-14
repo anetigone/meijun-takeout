@@ -45,15 +45,13 @@ public class DishController {
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Dish.class)))
     @GetMapping("/page")
-    public PageResult getPage(DishPageQueryDTO dishPageQueryDTO){
-        int pageNum = dishPageQueryDTO.getPageNum();
-        int pageSize = dishPageQueryDTO.getPageSize();
-        int offset = (pageNum - 1) * pageSize;
-        int size = pageSize;
+    public PageResult getPage(@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "10") int size) {
 
+        int offset = (page - 1) * size;
         List<Dish> list = dishService.getPage(offset,size);
+        int total = dishService.getDishCount();
 
-        return PageResult.success(list.size(), list, pageNum, pageSize);
+        return PageResult.success(total, list, page, size);
     }
 
     @Operation(summary = "获取推荐菜品")

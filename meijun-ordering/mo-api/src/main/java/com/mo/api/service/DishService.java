@@ -17,4 +17,6 @@ public interface DishService {
     List<Dish> getSearchResult(String name);
 
     void saveDish(Dish dish);
+
+    int getDishCount();
 }
