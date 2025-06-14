@@ -3,6 +3,7 @@ import Login from '../views/Login.vue';
 import DashboardAdm from '../views/Dashboard-adm.vue'; // 可以自行创建
 import DashboardMer from "../views/Dashboard-mer.vue";
 import DashboardEmp from "../views/Dashboard-emp.vue";
+import Chat from "../views/Chat.vue"; // 可以自行创建
 import Index from "../views/index.vue";
 import { checkAuthExpired } from '../utils/authStorage';
 import { ElMessage } from 'element-plus';
@@ -47,6 +48,15 @@ const routes = [
     { 
       requiresAuth: true ,
       title: '员工面板'
+    }
+  },
+  {
+    path: '/chat',
+    component: Chat,
+    meta: 
+    {
+      requiresAuth: true,
+      title: '聊天室'
     }
   }
 ];
