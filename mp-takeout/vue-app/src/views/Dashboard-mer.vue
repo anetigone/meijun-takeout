@@ -699,15 +699,15 @@ const testFetchEmployee = () => {
 onMounted(() => {
   currentEmployee.value = JSON.parse(localStorage.getItem('currentEmployee') || '{}')
   // 默认加载员工列表
-  //fetchStaff()
-  testFetchEmployee() // 测试数据
+  fetchStaff()
+  //testFetchEmployee() // 测试数据
   fetchUsers()
   fetchStores()
   fetchCoupons()
   fetchPromotions()
   fetchStats()
-  //fetchOrderPage(orderPage.value, orderPageSize.value)
-  testFetchOrder() // 测试数据
+  fetchOrderPage(orderPage.value, orderPageSize.value)
+  //testFetchOrder() // 测试数据
 })
 </script>
 
