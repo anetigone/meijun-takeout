@@ -64,12 +64,12 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   if(to.meta.requiresAuth && !token) {
     ElMessage.error('请先登录');
-    next(path);
+    next();
     return;
   }
   const checkAuth = checkAuthExpired();
   if (to.meta.requiresAuth && !checkAuth) {
-    next(path);
+    next();
     return;
   }
   

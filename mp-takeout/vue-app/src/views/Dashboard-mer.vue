@@ -26,7 +26,8 @@
             <el-button type="primary" @click="fetchOrderById">查询订单</el-button>
             <el-button v-if="isOrderSearchMode" @click="exitOrderSearch" type="info" size="small" style="margin-left: 10px;">
               取消
-            </el-button>"
+            </el-button>
+            <el-button type="success" @click="fetchOrder" style="margin-right: 10px;">刷新订单列表</el-button>
           </div>
           <el-table :data="orderList" style="margin-top: 16px;">
             <el-table-column prop="id" label="订单ID" />
@@ -90,18 +91,22 @@
           </div>
           <el-table :data="staffList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="name" label="姓名"/>
-            <el-table-column prop="phone" label="电话"/>
-            <el-table-column prop="status" label="状态">
+            <el-table-column prop="uuid" label="UUID" width="240"/>
+            <el-table-column prop="username" label="用户名" width="240"/>
+            <el-table-column prop="name" label="姓名" width="240"/>
+            <el-table-column prop="phone" label="电话" width="240"/>
+            <el-table-column prop="status" label="状态" width="180">
               <template #default="scope">
                 <span>{{ scope.row.status === 'active' ? '启用' : '禁用' }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="120">
+            <el-table-column prop="createTime" label="创建时间" width="360"/>
+            <el-table-column prop="updateTime" label="更新时间" width="360"/>
+            <el-table-column label="操作">
               <template #default="scope">
-                <el-button size="small" type="info" @click="handleViewEmployee(scope.row)">查看</el-button>
-                <el-button size="small" type="primary" @click="handleEditEmployee(scope.row)">更新</el-button>
-                <el-button size="small" type="danger" @click="deleteEmployeeFn(scope.row.id)">删除</el-button>
+                <el-button size="small" type="info" @click="handleViewEmployee(scope.row)" style="margin-left: 8px;">查看</el-button>
+                <el-button size="small" type="primary" @click="handleEditEmployee(scope.row)" style="margin-left: 8px;">更新</el-button>
+                <el-button size="small" type="danger" @click="deleteEmployeeFn(scope.row.id)" style="margin-left: 8px;">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -136,9 +141,9 @@
           </div>
           <el-table :data="userList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="name" label="用户名"/>
-            <el-table-column prop="phone" label="电话"/>
-            <el-table-column label="操作" width="120">
+            <el-table-column prop="name" label="用户名" width="120"/>
+            <el-table-column prop="phone" label="电话" width="240"/>
+            <el-table-column label="操作" width="240">
               <template #default="scope">
                 <el-button size="small" type="info" @click="handleViewUser(scope.row)">查看</el-button>
               </template>
@@ -218,11 +223,23 @@
   </el-container>
 
   <el-dialog v-model="orderDialogVisible" title="订单详情">
-    <el-descriptions :model="selectedOrder" border>
+    <el-descriptions :model="selectedOrder" 
+    direction="vertical"
+    :column="2"
+    :size="'default'"
+    border>
       <el-descriptions-item label="订单ID">{{ selectedOrder.id }}</el-descriptions-item>
       <el-descriptions-item label="状态">{{ selectedOrder.status }}</el-descriptions-item>
       <el-descriptions-item label="总价">￥{{ selectedOrder.total }}</el-descriptions-item>
       <el-descriptions-item label="下单时间">{{ selectedOrder.orderTime }}</el-descriptions-item>
+      <el-descriptions-item label="订单详情">
+        <el-table :data="selectedOrder.list" border>
+          <el-table-column prop="name" label="商品名称"/>
+          <el-table-column prop="unit" label="单价"/>
+          <el-table-column prop="quantity" label="数量"/>
+          <el-table-column prop="total" label="小计"/>
+        </el-table>
+      </el-descriptions-item>
       <!-- 其他字段可自行补充 -->
     </el-descriptions>
   </el-dialog>
@@ -641,16 +658,56 @@ const logout = () => {
     })
 }
 
+const testFetchOrder = () => {
+  orderList.value.push({
+    id: 1,
+    status: 'pending',
+    payStatus: 'unpaid',
+    orderTime: new Date('2023-10-01 12:00:00'),
+    total: 100.00,
+    list: [
+      {
+        id: 1,
+        name: '测试商品',
+        quantity: 2,
+        unit: 50.00,
+        total: 100.00
+      },
+      {
+        id: 2,
+        name: '测试商品2',
+        quantity: 1,
+        unit: 50.00,
+        total: 50.00
+      }
+    ]
+  })
+}
+
+const testFetchEmployee = () => {
+  staffList.value.push({
+    id: 1,
+    username: 'testuser',
+    name: '测试员工',
+    phone: '1234567890',
+    status: 'active',
+    createTime: new Date('2023-10-01 12:00:00'),
+    updateTime: new Date('2023-10-01 12:00:00')
+  })
+}
+
 onMounted(() => {
   currentEmployee.value = JSON.parse(localStorage.getItem('currentEmployee') || '{}')
   // 默认加载员工列表
-  fetchStaff()
+  //fetchStaff()
+  testFetchEmployee() // 测试数据
   fetchUsers()
   fetchStores()
   fetchCoupons()
   fetchPromotions()
   fetchStats()
-  fetchOrderPage(orderPage.value, orderPageSize.value)
+  //fetchOrderPage(orderPage.value, orderPageSize.value)
+  testFetchOrder() // 测试数据
 })
 </script>
 

@@ -72,12 +72,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrderByUserId(Long userId) {
-        return orderMapper.getOrderByUserId(userId);
+        List<Order> list = orderMapper.getOrderByUserId(userId);
+        for( Order order : list) {
+            Long id = order.getId();
+            List<OrderDetail> details = orderDetailMapper.getDetailsByOrderId(id);
+            order.setItems(details);
+        }
+
+        return list;
     }
 
     @Override
     public Order getOrderById(Long orderId) {
-        return orderMapper.getOrderById(orderId);
+        Order order = orderMapper.getOrderById(orderId);
+        if(order == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NULL);
+        }
+
+        Long id = order.getId();
+        List<OrderDetail> details = orderDetailMapper.getDetailsByOrderId(id);
+        order.setItems(details);
+
+        return order;
     }
 
     @Override
@@ -99,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @AutoFillTime
     public void saveAfterSale(AfterSale afterSale){
         afterSaleMapper.saveAfterSale(afterSale);
     }
