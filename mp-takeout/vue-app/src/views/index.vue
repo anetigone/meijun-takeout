@@ -14,8 +14,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const line1 = '欢迎使用 MeiJun 外卖系统'
-const line2 = '一个简洁高效的外卖管理平台'
+const line1 = '欢迎使用 MeiJun 在线点餐系统'
+const line2 = '一个简洁高效的在线点餐平台'
 
 const line1Display = ref('')
 const line2Display = ref('')

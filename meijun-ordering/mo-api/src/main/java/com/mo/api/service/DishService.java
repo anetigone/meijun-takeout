@@ -19,4 +19,6 @@ public interface DishService {
     void saveDish(Dish dish);
 
     int getDishCount();
+
+    Dish getDishById(Long id);
 }

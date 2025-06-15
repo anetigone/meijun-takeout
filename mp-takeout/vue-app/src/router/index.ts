@@ -5,6 +5,7 @@ import DashboardMer from "../views/Dashboard-mer.vue";
 import DashboardEmp from "../views/Dashboard-emp.vue";
 import Chat from "../views/Chat.vue"; // 可以自行创建
 import Index from "../views/index.vue";
+import NotFound from '../views/NotFound.vue'; // 可以自行创建
 import { checkAuthExpired } from '../utils/authStorage';
 import { ElMessage } from 'element-plus';
 
@@ -58,6 +59,11 @@ const routes = [
       requiresAuth: true,
       title: '聊天室'
     }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ];
 

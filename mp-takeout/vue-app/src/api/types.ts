@@ -259,3 +259,24 @@ export interface PromotionVO {
   promotionId?: number
   status?: string
 }
+
+export interface Dish {
+  id?: number;
+  name?: string;
+  categoryId?: number;
+  price?: number;
+  image?: string;
+  description?: string;
+  status?: number;
+  sale?: number;
+}
+
+export interface DishDTO {
+  name?: string;
+  categoryId?: number;
+  price?: number;
+  image?: string;
+  description?: string;
+  status?: number;
+  sale?: number;
+}

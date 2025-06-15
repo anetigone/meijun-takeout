@@ -22,6 +22,7 @@ export default defineComponent({
         <el-menu-item index="admin">管理员管理</el-menu-item>
         <el-menu-item index="employee">员工管理</el-menu-item>
         <el-menu-item index="stat">销售统计</el-menu-item>
+        <el-menu-item index="chat">聊天</el-menu-item>
       </el-menu>
     </el-aside>
     <el-main>
@@ -359,6 +360,9 @@ const handleMenuSelect = (key: string) => {
   if (key === 'admin') fetchAdminPage(1, adminPageSize.value)
   if (key === 'employee') fetchEmployeePage(1, employeePageSize.value)
   if (key === 'stat') fetchStats()
+  if( key === 'chat') {
+    router.push('/chat')
+  }
 }
 
 // 查看

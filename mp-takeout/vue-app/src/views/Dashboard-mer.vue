@@ -12,9 +12,11 @@
         <el-menu-item index="staff">员工管理</el-menu-item>
         <el-menu-item index="stores">门店管理</el-menu-item>
         <el-menu-item index="users">用户管理</el-menu-item>
+        <el-menu-item index="dishes">菜品管理</el-menu-item>
         <el-menu-item index="coupons">优惠券</el-menu-item>
         <el-menu-item index="promotions">促销活动</el-menu-item>
         <el-menu-item index="stat">销售统计</el-menu-item>
+        <el-menu-item index="chat">聊天</el-menu-item>
       </el-menu>
     </el-aside>
     <el-main>
@@ -141,7 +143,15 @@
           </div>
           <el-table :data="userList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="username" label="用户名" width="120"/>
+            <el-table-column prop="uuid" label="UUID" width="240"/>
+            <el-table-column prop="username" label="用户名" width="240"/>
+            <el-table-column prop="password" label="密码" width="240">
+              <template #default="scope">
+                <span>{{ scope.row.password?'******' : '未设置' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间"/>
+            <el-table-column prop="updateTime" label="更新时间"/>
             <el-table-column prop="phone" label="电话" width="240"/>
             <el-table-column label="操作" width="240">
               <template #default="scope">
@@ -159,6 +169,93 @@
             style="margin-top: 16px;"
           />
         </el-card>
+      </div>
+      <div v-else-if="activeMenu === 'dishes'">
+        <el-card>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <el-input v-model="dishSearchName" placeholder="输入菜品名称搜索" style="width: 200px; margin-right: 8px;" />
+              <el-button type="primary" @click="fetchDishes">搜索</el-button>
+              <el-button @click="resetDishSearch" style="margin-left: 8px;">重置</el-button>
+            </div>
+            <el-button type="success" @click="showDishDialog('add')">添加菜品</el-button>
+          </div>
+          <el-table :data="dishList" style="margin-top: 16px;">
+            <el-table-column prop="id" label="ID" width="60"/>
+            <el-table-column prop="name" label="菜品名称"/>
+            <el-table-column prop="categoryId" label="分类ID"/>
+            <el-table-column prop="price" label="价格"/>
+            <el-table-column prop="image" label="图片">
+              <template #default="scope">
+                <el-image v-if="scope.row.image" :src="scope.row.image" style="width: 40px; height: 40px;" fit="cover"/>
+              </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述"/>
+            <el-table-column prop="status" label="状态">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">
+                  {{ scope.row.status === 1 ? '起售' : '停售' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="sale" label="销量"/>
+            <el-table-column label="操作" width="180">
+              <template #default="scope">
+                <el-button size="small" type="info" @click="showDishDialog('view', scope.row)">查看</el-button>
+                <el-button size="small" type="primary" @click="showDishDialog('edit', scope.row)">编辑</el-button>
+                <!-- 可扩展删除功能 -->
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination
+            layout="prev, pager, next, sizes, total"
+            :total="dishTotal"
+            :page-size="dishPageSize"
+            :current-page="dishPage"
+            @current-change="onDishPageChange"
+            @size-change="onDishSizeChange"
+            style="margin-top: 16px;"
+          />
+        </el-card>
+        <!-- 菜品查看/编辑/新增弹窗 -->
+        <el-dialog v-model="dishDialogVisible" :title="dishDialogTitle" width="500px">
+          <el-form v-if="dishDialogMode !== 'view'" :model="dishForm" label-width="80px">
+            <el-form-item label="菜品名称">
+              <el-input v-model="dishForm.name" />
+            </el-form-item>
+            <el-form-item label="分类">
+              <el-select v-model="dishForm.categoryId" placeholder="请选择分类">
+                <el-option v-for="cat in dishCategories" :key="cat.id" :label="cat.name" :value="cat.id"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="价格">
+              <el-input v-model="dishForm.price" type="number" />
+            </el-form-item>
+            <el-form-item label="图片">
+              <el-input v-model="dishForm.image" placeholder="图片URL" />
+            </el-form-item>
+            <el-form-item label="描述">
+              <el-input v-model="dishForm.description" type="textarea" />
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-switch v-model="dishForm.status" :active-value="1" :inactive-value="0" active-text="起售" inactive-text="停售"/>
+            </el-form-item>
+          </el-form>
+          <div v-else>
+            <p><b>ID:</b> {{ dishForm.id }}</p>
+            <p><b>菜品名称:</b> {{ dishForm.name }}</p>
+            <p><b>分类ID:</b> {{ dishForm.categoryId }}</p>
+            <p><b>价格:</b> {{ dishForm.price }}</p>
+            <p><b>描述:</b> {{ dishForm.description }}</p>
+            <p><b>状态:</b> {{ dishForm.status === 1 ? '起售' : '停售' }}</p>
+            <p><b>销量:</b> {{ dishForm.sale }}</p>
+            <el-image v-if="dishForm.image" :src="dishForm.image" style="width: 80px; height: 80px;" fit="cover"/>
+          </div>
+          <template #footer>
+            <el-button v-if="dishDialogMode === 'edit' || dishDialogMode === 'add'" type="primary" @click="submitDishForm">确认</el-button>
+            <el-button @click="dishDialogVisible = false">取消</el-button>
+          </template>
+        </el-dialog>
       </div>
       <!-- 优惠券管理 -->
       <div v-else-if="activeMenu === 'coupons'">
@@ -295,6 +392,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type {
   Coupon,
   Customer,
+  Dish,
+  DishDTO,
   Employee,
   EmployeeSaveDTO,
   EmployeeUpdateDTO,
@@ -327,6 +426,7 @@ import {
   getEmployeeById,
   getCustomersPage
 } from '../api/merchant'
+import { getDishCategories, getDishPage, getSearchForDish, saveDish } from '../api/dish'
 
 const activeMenu = ref('orders')
 const orderId = ref(0)
@@ -380,6 +480,18 @@ const selectedUser = ref<Customer>({})
 const userPage = ref(1)
 const userPageSize = ref(10)
 const userTotal = ref(0)
+
+// 菜品管理相关
+const dishList = ref<Dish[]>([])
+const dishPage = ref(1)
+const dishPageSize = ref(10)
+const dishTotal = ref(0)
+const dishSearchName = ref('')
+const dishDialogVisible = ref(false)
+const dishDialogMode = ref<'view'|'edit'|'add'>('view')
+const dishDialogTitle = ref('菜品详情')
+const dishForm = ref<Partial<Dish>>({})
+const dishCategories = ref<Dish[]>([])
 
 const fetchOrderById = async () => {
   if (!orderId.value) return;
@@ -593,6 +705,74 @@ const onUserSizeChange = (size: number) => {
   fetchUsers(1, size)
 }
 
+const fetchDishes = async (page = dishPage.value, size = dishPageSize.value) => {
+  if (dishSearchName.value) {
+
+    let name = dishSearchName.value.trim()
+    if (!name) {
+      ElMessage.warning('请输入菜品名称')
+      return
+    }
+    const res = await getSearchForDish(name)
+    dishList.value = res.data.data || []
+    dishTotal.value = dishList.value.length
+    dishPageSize.value = size
+    dishPage.value = 1
+  } else {
+    const res = await getDishPage(page, size)
+    dishList.value =  res.data.records || []
+    dishTotal.value = res.data.total
+    dishPageSize.value = res.data.size || size
+    dishPage.value = page
+  }
+}
+
+const onDishPageChange = (page: number) => {
+  dishPage.value = page
+  fetchDishes(page, dishPageSize.value)
+}
+const onDishSizeChange = (size: number) => {
+  dishPageSize.value = size
+  dishPage.value = 1
+  fetchDishes(1, size)
+}
+const resetDishSearch = () => {
+  dishSearchName.value = ''
+  fetchDishes(1, dishPageSize.value)
+}
+
+const fetchDishCategories = async () => {
+  const res = await getDishCategories()
+  dishCategories.value = res.data.data || []
+}
+
+const showDishDialog = (mode: 'view'|'edit'|'add', row?: any) => {
+  dishDialogMode.value = mode
+  dishDialogTitle.value = mode === 'add' ? '添加菜品' : mode === 'edit' ? '编辑菜品' : '菜品详情'
+  if (mode === 'add') {
+    dishForm.value = { status: 1 }
+  } else if (row) {
+    dishForm.value = { ...row }
+  }
+  dishDialogVisible.value = true
+}
+
+const submitDishForm = async () => {
+  try {
+    if (dishDialogMode.value === 'add') {
+      await saveDish(dishForm.value as DishDTO)
+      ElMessage.success('添加成功')
+    } else if (dishDialogMode.value === 'edit') {
+      // 这里可扩展编辑接口
+      ElMessage.success('编辑功能待实现')
+    }
+    dishDialogVisible.value = false
+    fetchDishes(dishPage.value, dishPageSize.value)
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
 const fetchCoupons = async () => {
 	const res = await getCoupons()
 	couponList.value = res.data.data
@@ -643,6 +823,9 @@ const handleMenuSelect = (key: string) => {
   if (key === 'coupons') fetchCoupons()
   if (key === 'promotions') fetchPromotions()
   if (key === 'stat') fetchStats()
+  if (key === 'chat') {
+    router.push('/chat')
+  }
 }
 
 const logout = () => {

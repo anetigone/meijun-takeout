@@ -88,4 +88,11 @@ public class DishController {
 
         return Result.success(dishes);
     }
+
+    @GetMapping("/{id}")
+    public Result<Dish> getDishById(@PathVariable Long id){
+        Dish dish = dishService.getDishById(id);
+
+        return Result.success(dish);
+    }
 }

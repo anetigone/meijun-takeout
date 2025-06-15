@@ -8,7 +8,7 @@ import { ElContainer, ElHeader, ElMain, ElAside, ElMenu, ElMenuItem, ElPaginatio
   <el-container style="height: 100vh; width: 100%;">
     <!-- 顶部导航栏 -->
     <el-header style="background-color: #409EFF; color: white; display: flex; align-items: center; justify-content: space-between;">
-      <h1 style="margin: 0;">MeiJun 外卖系统</h1>
+      <h1 style="margin: 0;" @click="$router.push('/')">MeiJun 在线点餐系统</h1>
       <div>
         <el-menu
           default-active="$route.path"

@@ -63,4 +63,9 @@ public class DishServiceImpl implements DishService {
     public int getDishCount() {
         return dishMapper.getDishCount();
     }
+
+    @Override
+    public Dish getDishById(Long id) {
+        return dishMapper.getDishById(id);
+    }
 }
