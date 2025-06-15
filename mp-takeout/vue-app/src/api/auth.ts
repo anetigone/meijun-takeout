@@ -10,3 +10,6 @@ export const getCaptchaBase64 = () =>
 
 export const logoutApi = () =>
     request.post('/auth/logout');
+
+export const refreshTokenApi = () =>
+  request.post<ApiResponse<string>>('/auth/refresh-token');

@@ -3,6 +3,7 @@
     <div class="user-info">
       <span>当前用户：{{ currentEmployee.username || '未登录' }}</span>
       <el-button size="small" type="danger" @click="logout">退出登录</el-button>
+      <el-button size="small" type="primary" @click="refreshToken">刷新登录状态</el-button>
     </div>
   </el-header>
   <el-container>
@@ -402,7 +403,7 @@ import type {
   Promotion,
   Store
 } from '../api/types'
-import { logoutApi } from '../api/auth'
+import { logoutApi, refreshTokenApi } from '../api/auth'
 import router from '../router'
 import {
   getOrderById,
@@ -839,6 +840,18 @@ const logout = () => {
       localStorage.removeItem('userType')
       await router.push('/index')
     })
+}
+
+const refreshToken = async () => {
+  try {
+    const res = await refreshTokenApi()
+    const newToken = res.data.data
+    localStorage.setItem('token', newToken)
+    ElMessage.success('登录状态已刷新')
+  } catch (e) {
+    ElMessage.error('刷新失败，请重新登录')
+    await router.push('/login')
+  }
 }
 
 const testFetchOrder = () => {

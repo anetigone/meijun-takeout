@@ -13,6 +13,7 @@ export default defineComponent({
     <div class="user-info">
       <span>当前用户：{{ currentAdmin.username || '未登录' }}</span>
       <el-button size="small" type="danger" @click="logout">退出登录</el-button>
+      <el-button size="small" type="primary" @click="refreshToken">刷新Token</el-button>
     </div>
   </el-header>
   <el-container>
@@ -238,7 +239,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { upgradeAdmin, getAdminById, getEmployeeById, upgradeEmployee, getEmployeesByPage } from '../api/admin'
 import type { Admin, Employee, Product } from '../api/types'
 import router from "../router";
-import {logoutApi} from "../api/auth.ts";
+import {logoutApi, refreshTokenApi} from "../api/auth.ts";
 
 const activeMenu = ref('workspace')
 const workspaceData = ref()
@@ -428,6 +429,19 @@ const submitEmployeeUpdate = async () => {
     ElMessage.error('更新失败')
   }
 }
+
+const refreshToken = async () => {
+  try {
+    const res = await refreshTokenApi()
+    const newToken = res.data.data
+    localStorage.setItem('token', newToken)
+    ElMessage.success('登录状态已刷新')
+  } catch (e) {
+    ElMessage.error('刷新失败，请重新登录')
+    await router.push('/login')
+  }
+}
+// ...
 
 const logout = () => {
   ElMessageBox.confirm('确定退出登录吗？', '提示', { type: 'warning' })
