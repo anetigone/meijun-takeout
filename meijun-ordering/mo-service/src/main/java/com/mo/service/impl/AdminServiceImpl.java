@@ -73,4 +73,9 @@ public class AdminServiceImpl implements AdminService {
     public int getAdminCount() {
         return adminMapper.getAdminCount();
     }
+
+    @Override
+    public Admin getAdminById(Long id) {
+        return adminMapper.getAdminById(id);
+    }
 }

@@ -51,4 +51,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public int getEmployeeCount() {
         return employeeMapper.getEmployeeCount();
     }
+
+    @Override
+    public Employee getEmployeeById(Long id) {
+        return employeeMapper.getEmployeeById(id);
+    }
 }

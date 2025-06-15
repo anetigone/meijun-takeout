@@ -92,19 +92,18 @@
               <el-button type="success" @click="handleAddEmployee" style="margin-left: 8px;">添加员工</el-button>
             </div>
           </div>
-          <el-table :data="staffList" style="margin-top: 16px;">
+          <el-table :data="staffList" style="margin-top: 16px;" size="default">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="uuid" label="UUID" width="240"/>
-            <el-table-column prop="username" label="用户名" width="240"/>
-            <el-table-column prop="name" label="姓名" width="240"/>
-            <el-table-column prop="phone" label="电话" width="240"/>
+            <el-table-column prop="username" label="用户名" width="180"/>
+            <el-table-column prop="name" label="姓名" width="180"/>
+            <el-table-column prop="phone" label="电话" width="180"/>
             <el-table-column prop="status" label="状态" width="180">
               <template #default="scope">
                 <span>{{ scope.row.status === 'active' ? '启用' : '禁用' }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="360"/>
-            <el-table-column prop="updateTime" label="更新时间" width="360"/>
+            <el-table-column prop="createTime" label="创建时间" width="300"/>
+            <el-table-column prop="updateTime" label="更新时间" width="300"/>
             <el-table-column label="操作">
               <template #default="scope">
                 <el-button size="small" type="info" @click="handleViewEmployee(scope.row)" style="margin-left: 8px;">查看</el-button>
@@ -144,7 +143,6 @@
           </div>
           <el-table :data="userList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="uuid" label="UUID" width="240"/>
             <el-table-column prop="username" label="用户名" width="240"/>
             <el-table-column prop="password" label="密码" width="240">
               <template #default="scope">
@@ -179,7 +177,10 @@
               <el-button type="primary" @click="fetchDishes">搜索</el-button>
               <el-button @click="resetDishSearch" style="margin-left: 8px;">重置</el-button>
             </div>
-            <el-button type="success" @click="showDishDialog('add')">添加菜品</el-button>
+            <div style="display: flex; align-items: center;">
+              <el-button type="success" @click="showDishDialog('add')">添加菜品</el-button>
+              <el-button type="primary" @click="fetchDishes" style="margin-left: 8px">刷新</el-button>
+            </div>
           </div>
           <el-table :data="dishList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
@@ -261,7 +262,10 @@
       <!-- 优惠券管理 -->
       <div v-else-if="activeMenu === 'coupons'">
         <el-card>
-          <span>优惠券列表</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>优惠券列表</span>
+            <el-button type="success" @click="showAddCouponDialog">添加优惠券</el-button>
+          </div>
           <el-table :data="couponList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
             <el-table-column prop="name" label="名称"/>
@@ -346,6 +350,7 @@
   <el-dialog v-model="userDialogVisible" title="用户详情" width="400px">
     <div v-if="selectedUser">
       <p><b>ID:</b> {{ selectedUser.id }}</p>
+      <p><b>UUID:</b>{{ selectedUser.uuid }}</p>
       <p><b>用户名:</b> {{ selectedUser.username }}</p>
       <p><b>电话:</b> {{ selectedUser.phone }}</p>
       <p><b>Email:</b> {{ selectedUser.email }}</p>
@@ -374,6 +379,7 @@
     </el-form>
     <div v-else>
       <p><b>ID:</b> {{ employeeForm.id }}</p>
+      <p><b>UUID:</b> {{ employeeForm.uuid }}</p>
       <p><b>用户名:</b> {{ employeeForm.username }}</p>
       <p><b>电话:</b> {{ employeeForm.phone }}</p>
       <p><b>创建时间:</b> {{ employeeForm.createTime }}</p>
@@ -385,13 +391,37 @@
       <el-button @click="employeeDialogVisible = false">取消</el-button>
     </template>
   </el-dialog>
+  <el-dialog v-model="addCouponDialogVisible" title="添加优惠券" width="400px">
+    <el-form :model="couponForm" label-width="80px">
+      <el-form-item label="名称">
+        <el-input v-model="couponForm.name" />
+      </el-form-item>
+      <el-form-item label="折扣">
+        <el-input v-model.number="couponForm.value" type="number" />
+      </el-form-item>
+      <el-form-item label="类型">
+        <el-select v-model="couponForm.couponType" placeholder="请选择">
+          <el-option label="满减券" value="fixed" />
+          <el-option label="折扣券" value="percentage" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="有效期">
+        <el-date-picker v-model="couponForm.startTime" type="datetime" placeholder="开始时间" />
+        <el-date-picker v-model="couponForm.endTime" type="datetime" placeholder="结束时间" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="addCouponDialogVisible = false">取消</el-button>
+      <el-button type="primary" @click="submitAddCoupon">确认</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type {
-  Coupon,
+  Coupon, CouponDTO,
   Customer,
   Dish,
   DishDTO,
@@ -425,7 +455,7 @@ import {
   saveEmployee,
   getEmployeePage,
   getEmployeeById,
-  getCustomersPage
+  getCustomersPage, addCoupon
 } from '../api/merchant'
 import {getDishCategories, getDishPage, getSearchForDish, saveDish, updateDish} from '../api/dish'
 
@@ -493,6 +523,43 @@ const dishDialogMode = ref<'view'|'edit'|'add'>('view')
 const dishDialogTitle = ref('菜品详情')
 const dishForm = ref<Partial<Dish>>({})
 const dishCategories = ref<Dish[]>([])
+
+// 控制添加优惠券弹窗的显示状态
+const addCouponDialogVisible = ref(false)
+
+// 优惠券表单数据
+const couponForm = ref<Partial<CouponDTO>>({})
+
+// 显示添加优惠券弹窗
+const showAddCouponDialog = () => {
+  couponForm.value = {
+    name: '',
+    couponType: '',
+    description: '',
+    value: 0,
+    startTime: new Date(),
+    endTime: new Date(),
+  }
+  addCouponDialogVisible.value = true
+}
+
+// 提交添加优惠券
+const submitAddCoupon = async () => {
+  if (!couponForm.value.name || couponForm.value.value || !couponForm.value.couponType) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+
+  try {
+    // 假设你已有 saveCoupon 接口用于保存优惠券
+    await addCoupon(couponForm.value)
+    ElMessage.success('优惠券添加成功')
+    addCouponDialogVisible.value = false
+    await fetchCoupons() // 刷新优惠券列表
+  } catch (e) {
+    ElMessage.error('添加失败，请重试')
+  }
+}
 
 const fetchOrderById = async () => {
   if (!orderId.value) return;

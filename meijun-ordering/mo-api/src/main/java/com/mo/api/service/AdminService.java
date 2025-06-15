@@ -24,4 +24,6 @@ public interface AdminService {
     BigDecimal getSalesTotal();
 
     int getAdminCount();
+
+    Admin getAdminById(Long id);
 }

@@ -24,7 +24,6 @@
           <el-select v-model="form.identity" placeholder="请选择身份" size="large" style="width: 100%;">
             <el-option label="管理员" value="ADMIN" />
             <el-option label="商户" value="MERCHANT" />
-            <el-option label="员工" value="EMPLOYEE" />
           </el-select>
         </el-form-item>
         <el-button type="primary" native-type="submit" class="login-btn" size="large" round>登录</el-button>
@@ -81,6 +80,13 @@ const handleLogin = async () => {
     console.log(form.value);
     const res = await login(form.value);
     const { token, uuid } = res.data.data;
+    setAuth({
+      token,
+      uuid,
+      username: form.value.username,
+      userType: form.value.identity,
+      expireTime: 3600*1000
+    });
     // 根据身份跳转到不同的页面
     if (form.value.identity.toLowerCase() === 'admin') {
       await router.push('/adm-dashboard');
@@ -89,13 +95,6 @@ const handleLogin = async () => {
     } else if (form.value.identity.toLowerCase() === 'employee') {
       await router.push('/emp-dashboard');
     }
-    setAuth({
-      token,
-      uuid,
-      username: form.value.username,
-      userType: form.value.identity,
-      expireTime: 3600*1000
-    });
     ElMessage.success('登录成功');
   } catch (error) {
     console.log(error);

@@ -111,6 +111,13 @@ public class AdminController {
         return Result.success();
     }
 
+    @GetMapping("/{id}")
+    public Result<Admin> get(@PathVariable Long id){
+        Admin admin = adminService.getAdminById(id);
+
+        return Result.success(admin);
+    }
+
     @Operation (summary = "获取销售数据")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = Product.class)))
     @GetMapping("/sales")
@@ -204,6 +211,13 @@ public class AdminController {
          employeeService.deleteEmployee(id);
 
          return Result.success();
+    }
+
+    @GetMapping("/employee/{id}")
+    public Result<Employee> getEmployeeById(@PathVariable Long id){
+        Employee employee = employeeService.getEmployeeById(id);
+
+        return Result.success(employee);
     }
 
     @GetMapping("/workspace/data")

@@ -114,9 +114,8 @@ export default defineComponent({
           </div>
           <el-table :data="employeeList" style="width: 100%; margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
-            <el-table-column prop="uuid" label="UUID" width="240"/>
-            <el-table-column prop="username" label="用户名" width="240"/>
-            <el-table-column prop="password" label="密码" width="240">
+            <el-table-column prop="username" label="用户名" width="120"/>
+            <el-table-column prop="password" label="密码" width="120">
               <template #default="scope">
                 <span>{{ scope.row.password ? '******' : '未设置' }}</span>
               </template>
@@ -130,7 +129,7 @@ export default defineComponent({
             </el-table-column>
             <el-table-column prop="createTime" label="创建时间"/>
             <el-table-column prop="updateTime" label="更新时间"/>
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作">
               <template #default="scope">
                 <el-button size="small" type="info" @click="handleViewEmployee(scope.row)">查看</el-button>
                 <el-button size="small" type="primary" @click="handleEditEmployee(scope.row)">更新</el-button>
@@ -194,6 +193,7 @@ export default defineComponent({
     </el-form>
     <div v-else>
       <p><b>ID:</b>{{ adminForm.id }}</p>
+      <p><b>UUID:</b>{{ adminForm.uuid }}</p>
       <p><b>用户名:</b>{{ adminForm.username }}</p>
       <p><b>邮箱:</b>{{ adminForm.email }}</p>
       <p><b>角色:</b>{{ adminForm.role === 'ADMIN' ? '超级管理员' : '普通管理员' }}</p>
@@ -206,14 +206,34 @@ export default defineComponent({
       <el-button @click="adminDialogVisible = false">取消</el-button>
     </template>
   </el-dialog>
+  <el-dialog v-model="adminSaveDialogVisible" :title="'添加管理员'" width="400px">
+    <el-form :model="adminSaveForm" label-width="80px">
+      <el-form-item label="用户名">
+        <el-input v-model="adminSaveForm.username" />
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="adminSaveForm.email" />
+      </el-form-item>
+      <el-form-item label="密码">
+        <el-input v-model="adminSaveForm.password" type="password" show-password />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button type="primary" @click="submitAdminSave">确认</el-button>
+      <el-button @click="adminSaveDialogVisible = false">取消</el-button>
+    </template>
+  </el-dialog>
   <!-- 员工查看/编辑弹窗 -->
   <el-dialog v-model="employeeDialogVisible" :title="employeeDialogMode === 'view' ? '查看员工' : '更新员工'" width="400px">
     <el-form v-if="employeeDialogMode === 'edit'" :model="employeeForm" label-width="80px">
       <el-form-item label="用户名">
         <el-input v-model="employeeForm.username" />
       </el-form-item>
-      <el-form-item label="邮箱">
-        <el-input v-model="employeeForm.password" />
+      <el-form-item label="状态">
+        <el-select  v-model="employeeForm.status" placeholder="请选择状态">
+          <el-option label="启用" value="active" />
+          <el-option label="禁用" value="inactive" />
+        </el-select>
       </el-form-item>
       <el-form-item label="密码">
         <el-input v-model="employeeForm.password" type="password" show-password />
@@ -221,6 +241,7 @@ export default defineComponent({
     </el-form>
     <div v-else>
       <p><b>ID:</b>{{ employeeForm.id }}</p>
+      <p><b>UUID:</b>{{ employeeForm.uuid }}</p>
       <p><b>用户名:</b>{{ employeeForm.username }}</p>
       <p><b>创建时间:</b>{{ employeeForm.createTime }}</p>
       <p><b>更新时间:</b>{{ employeeForm.updateTime }}</p>
@@ -236,8 +257,8 @@ export default defineComponent({
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { upgradeAdmin, getAdminById, getEmployeeById, upgradeEmployee, getEmployeesByPage } from '../api/admin'
-import type { Admin, Employee, Product } from '../api/types'
+import {upgradeAdmin, getAdminById, getEmployeeById, upgradeEmployee, getEmployeesByPage, addAdmin} from '../api/admin'
+import type {Admin, AdminSaveDTO, Employee, Product} from '../api/types'
 import router from "../router";
 import {logoutApi, refreshTokenApi} from "../api/auth.ts";
 
@@ -250,8 +271,10 @@ const salesList = ref<Product[]>([])
 const salesTotal = ref(0)
 const traffic = ref(0)
 const adminDialogVisible = ref(false)
+const adminSaveDialogVisible = ref(false)
 const adminDialogMode = ref<'view' | 'edit'>('view')
 const adminForm = ref<Partial<Admin>>({})
+const adminSaveForm = ref<Partial<AdminSaveDTO>>({})
 const employeeDialogVisible = ref(false)
 const employeeDialogMode = ref<'view' | 'edit'>('view')
 const employeeForm = ref<Partial<Employee>>({})
@@ -263,8 +286,8 @@ const employeePageSize = ref(10)
 const employeeTotal = ref(0)
 const currentAdmin = ref<Partial<Admin>>({})
 
-// 工作台数据
 const fetchWorkspaceData = async () => {
+// 工作台数据
   const res = await getWorkspaceData()
   workspaceData.value = res.data.data
 }
@@ -317,8 +340,8 @@ const fetchEmployees = async () => {
   employeeList.value = res.data.data
 }
 // 员工分页
-const fetchEmployeePage = async (page = 1, size = 10) => {
-  const dto = { pageNum: page, pageSize: size }
+const fetchEmployeePage = async (page: number, size: number) => {
+  const dto = { page, size }
   const res = await getEmployeesByPage(dto)
   employeeList.value = res.data.records
   employeeTotal.value = res.data.total
@@ -383,9 +406,8 @@ const handleEditAdmin = (row: Admin) => {
 }
 // 添加管理员
 const handleAddAdmin = () => {
-  adminForm.value = {};
-  adminDialogMode.value = 'edit';
-  adminDialogVisible.value = true;
+  adminSaveForm.value = {};
+  adminSaveDialogVisible.value = true;
 };
 
 // 提交更新
@@ -399,6 +421,18 @@ const submitAdminUpdate = async () => {
     ElMessage.error('更新失败')
   }
 }
+
+const submitAdminSave = async () => {
+  try {
+    console.log(adminSaveForm.value)
+    await addAdmin(adminSaveForm.value as AdminSaveDTO)
+    ElMessage.success('添加成功')
+    adminSaveDialogVisible.value = false
+    await fetchAdmins()
+  } catch (e) {
+    ElMessage.error('添加失败')
+  }
+};
 
 const handleViewEmployee = async (row: Employee) => {
   const res = await getEmployeeById(row.id!)
@@ -466,7 +500,7 @@ onMounted(() => {
   if (storedUsername) {
     currentAdmin.value.username = storedUsername;
   }
-  // console.log(currentAdmin.value.username)
+  console.log(currentAdmin.value.username)
   fetchWorkspaceData()
   fetchOrderOverview()
   // 初始加载管理员和员工数据

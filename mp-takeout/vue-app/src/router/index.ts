@@ -98,14 +98,15 @@ const path = '/login';
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title as string || '默认标题';
   const token = localStorage.getItem('token');
+  console.log(token)
   if(to.meta.requiresAuth && !token) {
     ElMessage.error('请先登录');
-    next();
+    next(path);
     return;
   }
   const checkAuth = checkAuthExpired();
   if (to.meta.requiresAuth && !checkAuth) {
-    next();
+    next(path);
     return;
   }
   

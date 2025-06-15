@@ -31,8 +31,8 @@ export interface Admin {
 }
 
 export interface AdminPageQueryDTO {
-  pageNum: number;
-  pageSize: number;
+  page: number;
+  size: number;
 }
 
 export interface AdminUpdateDTO {

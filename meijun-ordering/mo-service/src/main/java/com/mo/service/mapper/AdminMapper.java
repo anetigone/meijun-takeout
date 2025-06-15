@@ -3,6 +3,7 @@ package com.mo.service.mapper;
 import com.mo.entity.Admin;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface AdminMapper {
     void saveAdmin(Admin admin);
 
     int getAdminCount();
+    @Select("select * from admins where id = #{id}")
+    Admin getAdminById(Long id);
 }

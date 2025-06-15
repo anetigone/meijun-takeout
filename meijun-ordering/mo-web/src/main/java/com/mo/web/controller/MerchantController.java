@@ -174,6 +174,13 @@ public class MerchantController {
         return PageResult.success(total, list, page, size);
     }
 
+    @GetMapping("/staff/{id}")
+    public Result<Employee> getEmployeeById(@PathVariable Long id) {
+        Employee employee = employeeService.getEmployeeById(id);
+
+        return Result.success(employee);
+    }
+
     @Operation(summary = "保存员工信息")
     @Parameters({
             @Parameter(name = "employee", schema = @Schema(implementation = EmployeeDTO.class))
@@ -340,7 +347,7 @@ public class MerchantController {
     @Parameters({
             @Parameter(name = "couponDTO", description = "优惠券参数", required = true, schema = @Schema(implementation = CouponDTO.class))
     })
-     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CouponVO.class)))
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CouponVO.class)))
     @PostMapping("/coupons")
     public Result<CouponVO> addCoupon(@RequestBody CouponDTO dto) {
         Coupon coupon = new Coupon();
