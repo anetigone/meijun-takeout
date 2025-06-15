@@ -63,5 +63,6 @@
                 updateTime = #{dish.updateTime},
             </if>
         </set>
+        where id = #{dish.id}
     </update>
 </mapper>

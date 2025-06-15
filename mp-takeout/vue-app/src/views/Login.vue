@@ -2,7 +2,7 @@
   <el-container class="login-bg">
     <el-card class="login-card">
       <h2 class="login-title">登录</h2>
-      <el-form @submit.prevent="handleLogin" :model="form" :rules="rules" ref="formRef" class="login-form">
+      <el-form @submit.prevent="handleLogin" :model="form" :rules="rules" ref="formRef" class="login-form" label-position="left" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" size="large" clearable />
         </el-form-item>
@@ -21,7 +21,7 @@
           </div>
         </el-form-item>
         <el-form-item label="身份" prop="role">
-          <el-select v-model="form.identity" placeholder="请选择身份" size="large">
+          <el-select v-model="form.identity" placeholder="请选择身份" size="large" style="width: 100%;">
             <el-option label="管理员" value="ADMIN" />
             <el-option label="商户" value="MERCHANT" />
             <el-option label="员工" value="EMPLOYEE" />
@@ -158,5 +158,26 @@ fetchCaptcha();
   margin-top: 10px;
   font-size: 18px;
   letter-spacing: 2px;
+}
+
+.login-form .el-form-item__content {
+  display: flex;
+  align-items: center;
+}
+
+.captcha-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.login-form .el-input, .login-form .el-select {
+  width: 100%;
+}
+
+/* 确保验证码输入框与其他输入框对齐 */
+.login-form .captcha-row .el-input {
+  width: 100px;
 }
 </style>

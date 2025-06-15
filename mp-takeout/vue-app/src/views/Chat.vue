@@ -1,12 +1,28 @@
 <template>
   <div class="chat-gradient-bg">
     <h2 class="chat-title">WebSocket 聊天室</h2>
-    <ChatWebSocket />
+    <ChatWebSocket :uuid="uuid" />
   </div>
 </template>
 
 <script setup lang="ts">
 import ChatWebSocket from '../components/ChatWebSocket.vue'
+import {onMounted, ref} from "vue";
+import {ElMessage} from "element-plus";
+import router from "../router";
+
+const uuid = ref('')
+
+onMounted(() => {
+  const storedUuid = localStorage.getItem('uuid')
+  if (storedUuid) {
+    uuid.value = storedUuid
+  } else {
+    ElMessage.warning('请先登录')
+    router.push('/index')
+    return
+  }
+})
 </script>
 
 <style scoped>
@@ -16,6 +32,7 @@ import ChatWebSocket from '../components/ChatWebSocket.vue'
   background: linear-gradient(120deg, #a18cd1 0%, #fbc2eb 25%, #fad0c4 50%, #ffd6e0 75%, #a1c4fd 100%);
   background-size: 200% 200%;
   animation: chatGradientMove 16s ease-in-out infinite;
+  height: 100%;
 }
 @keyframes chatGradientMove {
   0% {

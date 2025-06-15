@@ -35,8 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {ref, watch} from 'vue'
 import { ElMessage } from 'element-plus'
+
+const props = defineProps<{
+  uuid: string
+}>()
 
 const uuid = ref('')
 const input = ref('')
@@ -45,14 +49,22 @@ let ws: WebSocket | null = null
 const connected = ref(false)
 const username = ref('')
 
-function connect() {
+watch(() => props.uuid, (newUuid) => {
+  if(newUuid) {
+    console.log('uuid:', newUuid)
+    uuid.value = newUuid
+    connect(newUuid)
+  }
+})
+
+function connect(newUuid: string) {
   const uid = localStorage.getItem('uuid')
   const name = localStorage.getItem('username')
   if(!uid) {
     ElMessage.error('请先登录')
     return
   }
-  uuid.value = uid
+  uuid.value = newUuid
   username.value = name!
 
   ws = new WebSocket(`ws://localhost:8080/ws/${uuid.value}`)

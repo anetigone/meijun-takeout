@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/Login.vue';
-import DashboardAdm from '../views/Dashboard-adm.vue'; // 可以自行创建
+import DashboardAdm from '../views/Dashboard-adm.vue';
 import DashboardMer from "../views/Dashboard-mer.vue";
 import DashboardEmp from "../views/Dashboard-emp.vue";
-import Chat from "../views/Chat.vue"; // 可以自行创建
+import Chat from "../views/Chat.vue";
 import Index from "../views/index.vue";
-import NotFound from '../views/NotFound.vue'; // 可以自行创建
+import NotFound from '../views/NotFound.vue';
+import Game from "../views/Game.vue";
+import HelpCenter from "../views/HelpCenter.vue";
 import { checkAuthExpired } from '../utils/authStorage';
 import { ElMessage } from 'element-plus';
 
@@ -64,6 +66,24 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound
+  },
+  {
+    path: '/game',
+    component: Game,
+    meta:
+    {
+      requiresAuth: false,
+      title: 'Game'
+    }
+  },
+  {
+    path: '/help',
+    component: HelpCenter,
+    meta:
+    {
+      requiresAuth: false,
+      title: '帮助中心'
+    }
   }
 ];
 

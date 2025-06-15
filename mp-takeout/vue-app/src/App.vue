@@ -20,7 +20,7 @@ import { ElContainer, ElHeader, ElMain, ElAside, ElMenu, ElMenuItem, ElPaginatio
         >
           <el-menu-item index="/index">首页</el-menu-item>
           <el-menu-item index="/login">登录</el-menu-item>
-          <el-menu-item index="/dashboard">管理面板</el-menu-item>
+          <el-menu-item index="/game">小游戏</el-menu-item>
           <el-menu-item index="/about">关于我们</el-menu-item>
           <el-menu-item index="/contact">联系我们</el-menu-item>
           <el-menu-item index="/help">帮助中心</el-menu-item>
@@ -32,7 +32,7 @@ import { ElContainer, ElHeader, ElMain, ElAside, ElMenu, ElMenuItem, ElPaginatio
     </el-header>
 
     <!-- 页面主体内容 -->
-    <el-main style="padding: 0px;">
+    <el-main style="padding: 0; margin:0; height: auto; overflow: auto">
       <router-view />
     </el-main>
   </el-container>

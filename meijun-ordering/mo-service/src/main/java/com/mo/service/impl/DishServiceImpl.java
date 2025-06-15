@@ -68,4 +68,10 @@ public class DishServiceImpl implements DishService {
     public Dish getDishById(Long id) {
         return dishMapper.getDishById(id);
     }
+
+    @Override
+    @AutoFillTime
+    public void updateDish(Dish dish) {
+        dishMapper.updateDish(dish);
+    }
 }

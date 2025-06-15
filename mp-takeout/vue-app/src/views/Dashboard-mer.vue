@@ -426,7 +426,7 @@ import {
   getEmployeeById,
   getCustomersPage
 } from '../api/merchant'
-import { getDishCategories, getDishPage, getSearchForDish, saveDish } from '../api/dish'
+import {getDishCategories, getDishPage, getSearchForDish, saveDish, updateDish} from '../api/dish'
 
 const activeMenu = ref('orders')
 const orderId = ref(0)
@@ -763,8 +763,8 @@ const submitDishForm = async () => {
       await saveDish(dishForm.value as DishDTO)
       ElMessage.success('添加成功')
     } else if (dishDialogMode.value === 'edit') {
-      // 这里可扩展编辑接口
-      ElMessage.success('编辑功能待实现')
+      await updateDish(dishForm.value as DishDTO)
+      ElMessage.success('更新成功')
     }
     dishDialogVisible.value = false
     fetchDishes(dishPage.value, dishPageSize.value)
@@ -887,6 +887,8 @@ onMounted(() => {
   // 默认加载员工列表
   fetchStaff()
   //testFetchEmployee() // 测试数据
+  fetchDishes()
+  fetchDishCategories()
   fetchUsers()
   fetchStores()
   fetchCoupons()

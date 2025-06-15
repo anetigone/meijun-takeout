@@ -21,4 +21,6 @@ public interface DishService {
     int getDishCount();
 
     Dish getDishById(Long id);
+
+    void updateDish(Dish dish);
 }

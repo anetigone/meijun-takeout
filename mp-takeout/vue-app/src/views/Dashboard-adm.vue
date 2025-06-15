@@ -287,6 +287,7 @@ const fetchAdminPage = async (page:number, size:number) => {
   adminTotal.value = res.data.total
   adminPage.value = res.data.current
   adminPageSize.value = res.data.size
+  adminList.value = res.data.records
 }
 const onAdminPageChange = async (page: number) => {
   adminPage.value = page
