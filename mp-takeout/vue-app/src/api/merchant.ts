@@ -33,7 +33,7 @@ export const getOrderById = (orderId: number) =>
 
 // 修改订单状态
 export const updateOrderStatus = (orderId: number, status: number) =>
-    request.put<ApiResponse<Order>>(`/merchants/orders/${orderId}/status`, { status });
+    request.put<ApiResponse<Order>>(`/merchants/orders/${orderId}/status?status=${status}`);
 
 // 获取订单分页列表
 export const getOrderPage = (orderPageQueryDTO: OrderPageQueryDTO) =>

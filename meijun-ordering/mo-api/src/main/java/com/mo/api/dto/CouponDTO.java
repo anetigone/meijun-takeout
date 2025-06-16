@@ -27,6 +27,10 @@ public class CouponDTO implements Serializable {
     private String description;
     @Schema (description = "优惠券值")
     private BigDecimal value;
+    @Schema (description = "优惠券使用门槛")
+    private BigDecimal minAmount;
+    @Schema (description = "优惠券最大金额")
+    private BigDecimal maxAmount;
     @Schema (description = "优惠券开始时间")
     private LocalDateTime startTime;
      @Schema (description = "优惠券结束时间")

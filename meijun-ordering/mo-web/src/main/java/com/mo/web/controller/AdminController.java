@@ -191,11 +191,11 @@ public class AdminController {
              @Parameter(name = "id", description = "员工id", required = true, schema = @Schema(implementation = Long.class)),
              @Parameter(name = "employeeDTO", description = "员工参数", required = true, schema = @Schema(implementation = EmployeeDTO.class))
     })
-    @PutMapping ("/employee/{id}/update")
-    public Result<String> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO dto){
+    @PutMapping ("/employee/update")
+    public Result<String> updateEmployee(@RequestBody EmployeeDTO dto){
          Employee employee = new Employee();
+         log.info("dto: {}", dto);
          BeanUtils.copyProperties(dto, employee);
-         employee.setId(id);
 
           employeeService.updateEmployee(employee);
 

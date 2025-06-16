@@ -85,7 +85,6 @@ export default defineComponent({
             <el-table-column label="操作" width="200">
               <template #default="scope">
                 <el-button size="small" type="info" @click="handleViewAdmin(scope.row)">查看</el-button>
-                <el-button size="small" type="primary" @click="handleEditAdmin(scope.row)">更新</el-button>
                 <el-button size="small" type="danger" @click="deleteAdmin(scope.row.id)">删除</el-button>
               </template>
             </el-table-column>
@@ -108,7 +107,7 @@ export default defineComponent({
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: bold;">员工列表</span>
             <div>
-              <el-button type="primary" @click="fetchEmployees()">刷新</el-button>
+              <el-button type="primary" @click="fetchEmployees">刷新</el-button>
               <el-button type="success" @click="handleAddEmployee" style="margin-left: 8px;">添加员工</el-button>
             </div>
           </div>
@@ -247,7 +246,6 @@ export default defineComponent({
       <p><b>更新时间:</b>{{ employeeForm.updateTime }}</p>
     </div>
     <template #footer>
-      <el-button v-if="employeeDialogMode === 'view'" @click="employeeDialogMode = 'edit'">修改</el-button>
       <el-button v-if="employeeDialogMode === 'edit'" type="primary" @click="submitEmployeeUpdate">确认</el-button>
       <el-button @click="employeeDialogVisible = false">取消</el-button>
     </template>
@@ -336,8 +334,7 @@ const deleteAdmin = async (id: number) => {
 }
 // 员工列表
 const fetchEmployees = async () => {
-  const res = await getEmployees()
-  employeeList.value = res.data.data
+  await fetchEmployeePage(employeePage.value, employeePageSize.value)
 }
 // 员工分页
 const fetchEmployeePage = async (page: number, size: number) => {
@@ -360,7 +357,7 @@ const deleteEmployee = async (id: number) => {
     .then(async () => {
       await removeEmployee(id)
       ElMessage.success('删除成功')
-      await fetchEmployees()
+      await fetchEmployeePage(employeePage.value, employeePageSize.value)
     })
 }
 // 销售统计
@@ -455,10 +452,11 @@ const handleAddEmployee = () => {
 
 const submitEmployeeUpdate = async () => {
   try {
+    console.log(employeeForm.value)
     await upgradeEmployee(employeeForm.value)
     ElMessage.success('更新成功')
     employeeDialogVisible.value = false
-    await fetchEmployees()
+    await fetchEmployeePage(employeePage.value, employeePageSize.value)
   } catch (e) {
     ElMessage.error('更新失败')
   }

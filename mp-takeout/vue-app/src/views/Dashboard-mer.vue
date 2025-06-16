@@ -99,7 +99,9 @@
             <el-table-column prop="phone" label="电话" width="180"/>
             <el-table-column prop="status" label="状态" width="180">
               <template #default="scope">
-                <span>{{ scope.row.status === 'active' ? '启用' : '禁用' }}</span>
+                <el-tag :type="scope.row.status==='active' ? 'success':'info'">
+                  {{ scope.row.status === 'active' ? '启用' : '停用' }}
+                </el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="300"/>
@@ -269,7 +271,7 @@
           <el-table :data="couponList" style="margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
             <el-table-column prop="name" label="名称"/>
-            <el-table-column prop="discount" label="折扣"/>
+            <el-table-column prop="value" label="折扣"/>
             <el-table-column label="操作" width="120">
               <template #default="scope">
                 <el-button size="small" type="danger" @click="deleteCouponFn(scope.row.id)">删除</el-button>
@@ -348,14 +350,18 @@
 
   <!-- 用户查看弹窗 -->
   <el-dialog v-model="userDialogVisible" title="用户详情" width="400px">
-    <div v-if="selectedUser">
-      <p><b>ID:</b> {{ selectedUser.id }}</p>
-      <p><b>UUID:</b>{{ selectedUser.uuid }}</p>
-      <p><b>用户名:</b> {{ selectedUser.username }}</p>
-      <p><b>电话:</b> {{ selectedUser.phone }}</p>
-      <p><b>Email:</b> {{ selectedUser.email }}</p>
-      <p><b>注册时间:</b> {{ selectedUser.createTime }}</p>
-    </div>
+    <el-descriptions :model="selectedUser"
+    direction="horizontal"
+    :column="1"
+    :size="'default'"
+    border>
+      <el-descriptions-item label="用户ID">{{ selectedUser.id }}</el-descriptions-item>
+      <el-descriptions-item label="UUID">{{ selectedUser.uuid }}</el-descriptions-item>
+      <el-descriptions-item label="用户名">{{ selectedUser.username }}</el-descriptions-item>
+      <el-descriptions-item label="电话">{{ selectedUser.phone }}</el-descriptions-item>
+      <el-descriptions-item label="Email">{{ selectedUser.email }}</el-descriptions-item>
+      <el-descriptions-item label="注册时间">{{ selectedUser.createTime }}</el-descriptions-item>
+    </el-descriptions>
     <template #footer>
       <el-button @click="userDialogVisible = false">关闭</el-button>
     </template>
@@ -376,15 +382,24 @@
       <el-form-item label="电话">
         <el-input v-model="employeeForm.phone" />
       </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="employeeForm.status" placeholder="请选择">
+          <el-option label="启用" value="active" />
+          <el-option label="禁用" value="inactive" />
+        </el-select>
+      </el-form-item>
     </el-form>
-    <div v-else>
-      <p><b>ID:</b> {{ employeeForm.id }}</p>
-      <p><b>UUID:</b> {{ employeeForm.uuid }}</p>
-      <p><b>用户名:</b> {{ employeeForm.username }}</p>
-      <p><b>电话:</b> {{ employeeForm.phone }}</p>
-      <p><b>创建时间:</b> {{ employeeForm.createTime }}</p>
-      <p><b>更新时间:</b> {{ employeeForm.updateTime }}</p>
-    </div>
+    <el-descriptions v-else :model="employeeForm"
+    direction="horizontal"
+    :column="1"
+    :size="'default'"
+    border>
+      <el-descriptions-item label="用户名">{{ employeeForm.username }}</el-descriptions-item>
+      <el-descriptions-item label="密码" >{{ employeeForm.password }}</el-descriptions-item>
+      <el-descriptions-item label="姓名">{{ employeeForm.name }}</el-descriptions-item>
+      <el-descriptions-item label="电话">{{ employeeForm.phone }}</el-descriptions-item>
+      <el-descriptions-item label="状态">{{ employeeForm.status }}</el-descriptions-item>
+    </el-descriptions>
     <template #footer>
       <el-button v-if="employeeDialogMode === 'view'" @click="employeeDialogMode = 'edit'">修改</el-button>
       <el-button v-if="employeeDialogMode === 'edit'" type="primary" @click="submitEmployeeUpdate">确认</el-button>
@@ -396,14 +411,23 @@
       <el-form-item label="名称">
         <el-input v-model="couponForm.name" />
       </el-form-item>
-      <el-form-item label="折扣">
-        <el-input v-model.number="couponForm.value" type="number" />
-      </el-form-item>
       <el-form-item label="类型">
         <el-select v-model="couponForm.couponType" placeholder="请选择">
           <el-option label="满减券" value="fixed" />
           <el-option label="折扣券" value="percentage" />
         </el-select>
+      </el-form-item>
+      <el-form-item label="折扣" v-if="couponForm.couponType === 'percentage'">
+        <el-input v-model.number="couponForm.value" type="number" />
+      </el-form-item>
+      <el-form-item label="满减值" v-if="couponForm.couponType === 'fixed'">
+        <el-input v-model.number="couponForm.value" type="number" />
+      </el-form-item>
+      <el-form-item label="最低金额">
+        <el-input v-model.number="couponForm.minAmount" type="number" />
+      </el-form-item>
+      <el-form-item label="最大金额" v-if="couponForm.couponType === 'fixed'">
+        <el-input v-model.number="couponForm.maxAmount" type="number" />
       </el-form-item>
       <el-form-item label="有效期">
         <el-date-picker v-model="couponForm.startTime" type="datetime" placeholder="开始时间" />
@@ -545,7 +569,7 @@ const showAddCouponDialog = () => {
 
 // 提交添加优惠券
 const submitAddCoupon = async () => {
-  if (!couponForm.value.name || couponForm.value.value || !couponForm.value.couponType) {
+  if (!couponForm.value.name || !couponForm.value.value || !couponForm.value.couponType) {
     ElMessage.warning('请填写完整信息')
     return
   }
@@ -645,6 +669,7 @@ const showConfirmDialog = async (order: Order, message: string, actionType: 'acc
         reason
       });
     }
+    await fetchOrderPage(orderPage.value, orderPageSize.value);
   } catch (error) {
     // 用户取消或发生错误
   }

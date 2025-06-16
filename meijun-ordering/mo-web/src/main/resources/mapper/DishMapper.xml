@@ -3,20 +3,16 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mo.service.mapper.DishMapper">
     <select id="getCategories" resultType="com.mo.entity.Dish">
-        select * from dishes where status = 1
-                             order by category_id
+        select * from dishes order by category_id
     </select>
     <select id="getPage" resultType="com.mo.entity.Dish">
-        select * from dishes where status = 1
-                             limit #{offset},#{size}
+        select * from dishes limit #{offset},#{size}
     </select>
     <select id="getDishByCategory" resultType="com.mo.entity.Dish">
-        select * from dishes where status = 1
-                               and category_id = #{categoryId}
+        select * from dishes where category_id = #{categoryId}
     </select>
     <select id="getSearchResult" resultType="com.mo.entity.Dish">
-        select * from dishes where status = 1
-                               and name like concat('%',#{name},'%')
+        select * from dishes where  name like concat('%',#{name},'%')
     </select>
     <select id="getDishById" resultType="com.mo.entity.Dish">
         select * from dishes where id = #{id}

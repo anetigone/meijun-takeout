@@ -12,10 +12,10 @@
         select * from employees where id = #{id}
     </select>
     <select id="getAll" resultType="com.mo.entity.Employee">
-        select * from employees where status = 1
+        select * from employees
     </select>
     <select id="getPage" resultType="com.mo.entity.Employee">
-        select * from employees where status = 1
+        select * from employees
         limit #{offset},#{size}
     </select>
     <select id="getEmployeeCount" resultType="java.lang.Integer">
@@ -45,6 +45,9 @@
             </if>
             <if test="employee.merchant_id != null">
                 merchant_id = #{employee.merchant_id},
+            </if>
+            <if test="employee.status != null">
+                `status` = #{employee.status},
             </if>
         </set>
         where id = #{employee.id}

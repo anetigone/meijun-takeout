@@ -1,5 +1,6 @@
 package com.mo.api.dto;
 
+import com.mo.common.enumeration.ActiveStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -31,5 +32,7 @@ public class EmployeeDTO implements Serializable {
     private String idNumber;
     @Schema(description = "商家id")
     private Long merchantId;
+    @Schema(description = "状态")
+    private ActiveStatus status;
 
 }

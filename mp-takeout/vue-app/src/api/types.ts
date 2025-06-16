@@ -195,6 +195,8 @@ export interface CouponDTO {
   couponType?: string;
   description?: string;
   value?: number;
+  minAmount?: number;
+  maxAmount?: number;
   startTime?: Date;
   endTime?: Date;
 }
