@@ -75,7 +75,7 @@ public class AdminController {
     })
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = String.class)))
     @PutMapping("/update")
-    public Result<String> update(AdminUpdateDTO dto){
+    public Result<String> update(@RequestBody AdminUpdateDTO dto){
         Admin admin = new Admin();
         BeanUtils.copyProperties(dto, admin);
         adminService.updateAdmin(admin);

@@ -49,6 +49,8 @@ public class User implements Serializable {
     protected String avatar_url;
     @Schema(description = "jwt令牌")
     protected String token;
+    @Schema(description = "邮箱")
+    private String email;
 
     protected LocalDateTime createTime;
     protected LocalDateTime updateTime;

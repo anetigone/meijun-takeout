@@ -28,11 +28,14 @@
             <if test="admin.password != null and admin.password != ''" >
                 `password` = #{admin.password},
             </if>
+            <if test="admin.email != null and admin.email != ''">
+                email = #{admin.email},
+            </if>
             <if test="admin.updateTime != null" >
                 updateTime = #{admin.updateTime},
             </if>
         </set>
-        where id = #{id}
+        where id = #{admin.id}
     </update>
 
     <insert id="saveAdmin"
@@ -40,7 +43,7 @@
             useGeneratedKeys="true"
             keyProperty="id">
         insert into admins(username, password, uuid, createTime, updateTime)
-        values(#{username}, #{password}, #{uuid} ,#{createTime}, #{updateTime})
+        values(#{admin.username}, #{admin.password}, #{admin.uuid} ,#{admin.createTime}, #{admin.updateTime})
     </insert>
 
     <delete id="deleteAdmin">

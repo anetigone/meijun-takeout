@@ -40,6 +40,7 @@ export interface AdminUpdateDTO {
   username?: string;
   password?: string;
   email?: string;
+  role?: string;
 }
 
 export interface AdminSaveDTO {

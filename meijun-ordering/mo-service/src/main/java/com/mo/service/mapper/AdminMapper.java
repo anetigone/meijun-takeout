@@ -16,11 +16,11 @@ public interface AdminMapper {
     List<Admin> getAllAdmin();
     List<Admin> getPage(int offset, int size);
 
-    void updateAdmin(Admin admin);
+    void updateAdmin(@Param("admin") Admin admin);
 
     void deleteAdmin(Long id);
 
-    void saveAdmin(Admin admin);
+    void saveAdmin(@Param("admin") Admin admin);
 
     int getAdminCount();
     @Select("select * from admins where id = #{id}")

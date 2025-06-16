@@ -64,8 +64,8 @@ export default defineComponent({
           <el-table :data="adminList" style="width: 100%; margin-top: 16px;">
             <el-table-column prop="id" label="ID" width="60"/>
             <el-table-column prop="uuid" label="UUID" width="240"/>
-            <el-table-column prop="username" label="用户名" width="240"/>
-            <el-table-column prop="password" label="密码" width="240">
+            <el-table-column prop="username" label="用户名" width="120"/>
+            <el-table-column prop="password" label="密码" width="120">
               <template #default="scope">
                 <span>{{ scope.row.password ? '******' : '未设置' }}</span>
               </template>
@@ -85,6 +85,7 @@ export default defineComponent({
             <el-table-column label="操作" width="200">
               <template #default="scope">
                 <el-button size="small" type="info" @click="handleViewAdmin(scope.row)">查看</el-button>
+                <el-button size="small" type="primary" @click="handleEditAdmin(scope.row)">更新</el-button>
                 <el-button size="small" type="danger" @click="deleteAdmin(scope.row.id)">删除</el-button>
               </template>
             </el-table-column>
@@ -166,7 +167,7 @@ export default defineComponent({
           <el-col :span="8">
             <el-card>
               <div>热销商品</div>
-              <el-table :data="salesList" size="small" style="margin-top: 8px;">
+              <el-table :data="salesList" size="default" style="margin-top: 8px;">
                 <el-table-column prop="name" label="商品"/>
                 <el-table-column prop="sales" label="销量"/>
               </el-table>
@@ -194,6 +195,7 @@ export default defineComponent({
       <p><b>ID:</b>{{ adminForm.id }}</p>
       <p><b>UUID:</b>{{ adminForm.uuid }}</p>
       <p><b>用户名:</b>{{ adminForm.username }}</p>
+      <p><b>密码:</b>{{ adminForm.password }}</p>
       <p><b>邮箱:</b>{{ adminForm.email }}</p>
       <p><b>角色:</b>{{ adminForm.role === 'ADMIN' ? '超级管理员' : '普通管理员' }}</p>
       <p><b>创建时间:</b>{{ adminForm.createTime }}</p>
@@ -246,6 +248,7 @@ export default defineComponent({
       <p><b>更新时间:</b>{{ employeeForm.updateTime }}</p>
     </div>
     <template #footer>
+      <el-button v-if="employeeDialogMode === 'view'" @click="employeeDialogMode = 'edit'">修改</el-button>
       <el-button v-if="employeeDialogMode === 'edit'" type="primary" @click="submitEmployeeUpdate">确认</el-button>
       <el-button @click="employeeDialogVisible = false">取消</el-button>
     </template>
@@ -256,7 +259,7 @@ export default defineComponent({
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {upgradeAdmin, getAdminById, getEmployeeById, upgradeEmployee, getEmployeesByPage, addAdmin} from '../api/admin'
-import type {Admin, AdminSaveDTO, Employee, Product} from '../api/types'
+import type {Admin, AdminSaveDTO, AdminUpdateDTO, Employee, Product} from '../api/types'
 import router from "../router";
 import {logoutApi, refreshTokenApi} from "../api/auth.ts";
 
@@ -283,6 +286,7 @@ const employeePage = ref(1)
 const employeePageSize = ref(10)
 const employeeTotal = ref(0)
 const currentAdmin = ref<Partial<Admin>>({})
+const adminUpdateForm = ref<Partial<AdminUpdateDTO>>({})
 
 const fetchWorkspaceData = async () => {
 // 工作台数据
@@ -410,7 +414,15 @@ const handleAddAdmin = () => {
 // 提交更新
 const submitAdminUpdate = async () => {
   try {
-    await upgradeAdmin(adminForm.value)
+    console.log(adminForm.value)
+    adminUpdateForm.value = {
+      id: adminForm.value.id,
+      username: adminForm.value.username,
+      password: adminForm.value.password,
+      email: adminForm.value.email,
+      role: adminForm.value.role
+    }
+    await upgradeAdmin(adminUpdateForm.value)
     ElMessage.success('更新成功')
     adminDialogVisible.value = false
     await fetchAdmins()
@@ -452,7 +464,6 @@ const handleAddEmployee = () => {
 
 const submitEmployeeUpdate = async () => {
   try {
-    console.log(employeeForm.value)
     await upgradeEmployee(employeeForm.value)
     ElMessage.success('更新成功')
     employeeDialogVisible.value = false

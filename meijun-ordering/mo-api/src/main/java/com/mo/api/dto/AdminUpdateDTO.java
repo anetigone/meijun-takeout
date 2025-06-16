@@ -20,5 +20,7 @@ public class AdminUpdateDTO implements Serializable {
     private String username;
     @Schema(description = "密码")
     private String password;
+    @Schema(description = "邮箱")
+    private String email;
 
 }
